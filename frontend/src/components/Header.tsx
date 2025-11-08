@@ -3,6 +3,20 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { LiaTelegramPlane } from "react-icons/lia";
+
+interface DropdownItem {
+  name: string
+  href: string
+  divider?: boolean
+}
+
+interface MenuItem {
+  name: string
+  href: string
+  hasDropdown?: boolean
+  dropdownItems?: DropdownItem[]
+}
+
 const Header = () => {
   const [isScrolled, setIsScrolled] = useState(false)
   const [isMenuOpen, setIsMenuOpen] = useState(false)
@@ -18,7 +32,7 @@ const Header = () => {
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
 
-  const menuItems = [
+  const menuItems: MenuItem[] = [
     { name: 'Trang chủ', href: '/' },
     { name: 'Giới thiệu', href: '/about' },
     // {

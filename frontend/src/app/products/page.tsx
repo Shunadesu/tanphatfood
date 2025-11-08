@@ -228,7 +228,7 @@ export default function ProductsPage() {
                 Tìm thấy <span className="font-bold text-[#00652E]">{filteredProducts.length}</span> sản phẩm
                 {searchQuery && (
                   <span>
-                    {' '}cho từ khóa "<span className="font-semibold">{searchQuery}</span>"
+                    {' '}cho từ khóa &ldquo;<span className="font-semibold">{searchQuery}</span>&rdquo;
                   </span>
                 )}
               </p>
