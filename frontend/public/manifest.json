@@ -1,0 +1,22 @@
+{
+  "name": "Tấn Phát Food - Nông sản Việt Nam chất lượng cao",
+  "short_name": "Tấn Phát Food",
+  "description": "Tấn Phát Food - Nhà cung cấp nông sản Việt Nam chất lượng cao",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#00652E",
+  "icons": [
+    {
+      "src": "/images/logo.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/images/logo.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
+
