@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { LiaTelegramPlane } from 'react-icons/lia'
 import { HiChevronDown } from 'react-icons/hi'
+import { quotesApi } from '@/services/api'
 
 const QuoteSection = () => {
   const [formData, setFormData] = useState({
@@ -13,6 +14,11 @@ const QuoteSection = () => {
     market: '',
   })
   const [isProductTypeOpen, setIsProductTypeOpen] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [submitStatus, setSubmitStatus] = useState<{
+    type: 'success' | 'error' | null
+    message: string
+  }>({ type: null, message: '' })
   const dropdownRef = useRef<HTMLDivElement>(null)
 
   // Close dropdown when clicking outside
@@ -39,18 +45,101 @@ const QuoteSection = () => {
     'Gia vị - Nông sản khô',
   ]
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target
     setFormData((prev) => ({
       ...prev,
       [name]: value,
     }))
+    // Clear status message when user starts typing
+    if (submitStatus.type) {
+      setSubmitStatus({ type: null, message: '' })
+    }
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    // TODO: Handle form submission
-    console.log('Form submitted:', formData)
+    
+    // Validate required fields
+    if (!formData.fullName.trim()) {
+      setSubmitStatus({
+        type: 'error',
+        message: 'Vui lòng điền đầy đủ thông tin bắt buộc (Họ tên)',
+      })
+      return
+    }
+
+    setIsSubmitting(true)
+    setSubmitStatus({ type: null, message: '' })
+
+    try {
+      // Prepare data for API
+      // Note: Email is required by backend, so we'll use a placeholder or generate from phone if available
+      const quoteData: any = {
+        name: formData.fullName.trim(),
+        email: formData.phone.trim() 
+          ? `contact_${formData.phone.trim().replace(/\s+/g, '')}@tanphatfood.com`
+          : `contact_${Date.now()}@tanphatfood.com`, // Fallback email if no phone
+      }
+
+      // Add optional fields if they have values
+      if (formData.phone.trim()) {
+        quoteData.phone = formData.phone.trim()
+      }
+
+      if (formData.productName.trim()) {
+        quoteData.productName = formData.productName.trim()
+      }
+
+      if (formData.market.trim()) {
+        quoteData.country = formData.market.trim()
+      }
+
+      // Add productType to message
+      if (formData.productType) {
+        quoteData.message = `Loại sản phẩm: ${formData.productType}`
+      }
+
+      // Submit to API
+      const response = await quotesApi.create(quoteData)
+
+      if (response.success) {
+        // Success - reset form and show success message
+        setFormData({
+          fullName: '',
+          phone: '',
+          productName: '',
+          productType: 'Trái cây tươi',
+          market: '',
+        })
+        setSubmitStatus({
+          type: 'success',
+          message: 'Gửi yêu cầu báo giá thành công! Chúng tôi sẽ liên hệ với bạn trong thời gian sớm nhất.',
+        })
+
+        // Scroll to top of form to show success message
+        setTimeout(() => {
+          const formElement = document.getElementById('quote-form')
+          if (formElement) {
+            formElement.scrollIntoView({ behavior: 'smooth', block: 'start' })
+          }
+        }, 100)
+      } else {
+        // Error from API
+        setSubmitStatus({
+          type: 'error',
+          message: response.message || 'Có lỗi xảy ra khi gửi yêu cầu. Vui lòng thử lại sau.',
+        })
+      }
+    } catch (error: any) {
+      console.error('Error submitting quote:', error)
+      setSubmitStatus({
+        type: 'error',
+        message: 'Có lỗi xảy ra khi gửi yêu cầu. Vui lòng thử lại sau.',
+      })
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   return (
@@ -93,12 +182,25 @@ const QuoteSection = () => {
 
               {/* Form Content */}
               <div className="relative" style={{ overflow: 'visible' }}>
-                <form onSubmit={handleSubmit} className="p-6 md:p-8" style={{ paddingBottom: isProductTypeOpen ? '140px' : '2rem' }}>
+                <form id="quote-form" onSubmit={handleSubmit} className="p-6 md:p-8" style={{ paddingBottom: isProductTypeOpen ? '140px' : '2rem' }}>
+                  {/* Status Message */}
+                  {submitStatus.type && (
+                    <div
+                      className={`mb-6 p-4 rounded-lg ${
+                        submitStatus.type === 'success'
+                          ? 'bg-green-50 text-green-800 border border-green-200'
+                          : 'bg-red-50 text-red-800 border border-red-200'
+                      }`}
+                    >
+                      <p className="text-sm font-medium">{submitStatus.message}</p>
+                    </div>
+                  )}
+
                   <div className="space-y-4 md:space-y-6 mb-6">
                     {/* Two Column Fields */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                       {/* Left Column */}
-                      <div className="space-y-4 md:space-y-6">
+                      <div>
                         {/* Họ và tên */}
                         <div>
                           <label
@@ -116,32 +218,13 @@ const QuoteSection = () => {
                             placeholder="Nhập tên của bạn..."
                             className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00652E] focus:border-transparent text-gray-900"
                             required
-                          />
-                        </div>
-
-                        {/* Tên sản phẩm */}
-                        <div>
-                          <label
-                            htmlFor="productName"
-                            className="block text-sm font-semibold text-gray-700 mb-2"
-                          >
-                            Tên sản phẩm
-                          </label>
-                          <input
-                            type="text"
-                            id="productName"
-                            name="productName"
-                            value={formData.productName}
-                            onChange={handleInputChange}
-                            placeholder="Nhập thông tin ..."
-                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00652E] focus:border-transparent text-gray-900"
-                            required
+                            disabled={isSubmitting}
                           />
                         </div>
                       </div>
 
                       {/* Right Column */}
-                      <div className="space-y-4 md:space-y-6">
+                      <div>
                         {/* Điện thoại */}
                         <div>
                           <label
@@ -158,10 +241,39 @@ const QuoteSection = () => {
                             onChange={handleInputChange}
                             placeholder="Nhập điện thoại của bạn..."
                             className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00652E] focus:border-transparent text-gray-900"
-                            required
+                            disabled={isSubmitting}
                           />
                         </div>
+                      </div>
+                    </div>
 
+                    {/* Two Column Fields - Second Row */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+                      {/* Left Column */}
+                      <div>
+                        {/* Tên sản phẩm */}
+                        <div>
+                          <label
+                            htmlFor="productName"
+                            className="block text-sm font-semibold text-gray-700 mb-2"
+                          >
+                            Tên sản phẩm
+                          </label>
+                          <input
+                            type="text"
+                            id="productName"
+                            name="productName"
+                            value={formData.productName}
+                            onChange={handleInputChange}
+                            placeholder="Nhập thông tin ..."
+                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00652E] focus:border-transparent text-gray-900"
+                            disabled={isSubmitting}
+                          />
+                        </div>
+                      </div>
+
+                      {/* Right Column */}
+                      <div>
                         {/* Thị trường */}
                         <div>
                           <label
@@ -178,7 +290,7 @@ const QuoteSection = () => {
                             onChange={handleInputChange}
                             placeholder="Nhập thông tin ..."
                             className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00652E] focus:border-transparent text-gray-900"
-                            required
+                            disabled={isSubmitting}
                           />
                         </div>
                       </div>
@@ -198,18 +310,21 @@ const QuoteSection = () => {
                           onClick={(e) => {
                             e.preventDefault()
                             e.stopPropagation()
-                            setIsProductTypeOpen(!isProductTypeOpen)
+                            if (!isSubmitting) {
+                              setIsProductTypeOpen(!isProductTypeOpen)
+                            }
                           }}
-                          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00652E] focus:border-transparent text-gray-900 bg-white flex items-center justify-between"
+                          disabled={isSubmitting}
+                          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00652E] focus:border-transparent text-gray-900 bg-white flex items-center justify-between disabled:opacity-50 disabled:cursor-not-allowed text-left"
                         >
                           <span>{formData.productType}</span>
                           <HiChevronDown
-                            className={`w-5 h-5 text-gray-500 transition-transform ${
+                            className={`w-5 h-5 text-gray-500 transition-transform flex-shrink-0 ${
                               isProductTypeOpen ? 'rotate-180' : ''
                             }`}
                           />
                         </button>
-                        {isProductTypeOpen && (
+                        {isProductTypeOpen && !isSubmitting && (
                           <div className="absolute z-[9999] w-full top-full left-0 mt-1 bg-white border border-gray-300 rounded-lg shadow-2xl">
                             {productTypes.map((type) => (
                               <button
@@ -237,10 +352,20 @@ const QuoteSection = () => {
                     {/* Submit Button */}
                     <button
                       type="submit"
-                      className="button-primary flex-1 inline-flex items-center justify-center gap-2"
+                      disabled={isSubmitting}
+                      className="button-primary flex-1 inline-flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      <span>Liên hệ báo giá!</span>
-                      <LiaTelegramPlane className="w-5 h-5" />
+                      {isSubmitting ? (
+                        <>
+                          <span className="loading loading-spinner loading-sm"></span>
+                          <span>Đang gửi...</span>
+                        </>
+                      ) : (
+                        <>
+                          <span>Liên hệ báo giá!</span>
+                          <LiaTelegramPlane className="w-5 h-5" />
+                        </>
+                      )}
                     </button>
 
                     {/* Hotline Button */}

@@ -10,6 +10,7 @@ import {
 const router = express.Router();
 
 // Upload một ảnh
+// Multer middleware sẽ parse multipart/form-data và đặt file vào req.file
 router.post('/', upload.single('image'), uploadImage);
 
 // Upload nhiều ảnh

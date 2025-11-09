@@ -25,7 +25,7 @@ const PartnersSection = () => {
   ]
 
   return (
-    <section className="relative py-16 md:py-20 bg-gray-50">
+    <section className="relative py-8 md:py-12">
       <div className="container mx-auto px-4 max-w-7xl">
         {/* Main Card - Contains Map and Statistics */}
         <div className="bg-white rounded-[30px] shadow-sm overflow-hidden">
@@ -35,7 +35,7 @@ const PartnersSection = () => {
               <img 
                 src="/images/doitac.jpg" 
                 alt="Global Partners Map" 
-                className="w-full h-auto object-cover"
+                className="w-full h-[30vh] md:h-auto object-cover"
               />
             </div>
           </div>

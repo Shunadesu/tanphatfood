@@ -5,28 +5,79 @@ import Header from '@/components/Header'
 import Footer from '@/components/Footer'
 import ProductCard from '@/components/ProductCard'
 import QuoteSection from '@/components/QuoteSection'
-import { HiChevronRight, HiChevronLeft } from 'react-icons/hi'
-import { useState } from 'react'
+import HeroSectionWithBreadcrumb from '@/components/HeroSectionWithBreadcrumb'
+import { HiChevronLeft, HiChevronRight } from 'react-icons/hi'
+import { useState, useEffect } from 'react'
 import ConnectionSection from '@/components/ConnectionSection'
 import ProcessSection from '@/components/ProcessSection'
 import NewsSection from '@/components/NewsSection'
 import FloatingContactButtons from '@/components/FloatingContactButtons'
 import ScrollToTop from '@/components/ScrollToTop'
-import { getAllDriedProducts } from '@/data/mockProducts'
+import { productsApi } from '@/services/api'
+
+interface Product {
+  id: string
+  title: string
+  description: string
+  image: string
+  slug: string
+  type: string
+}
 
 export default function DriedFruitsPage() {
   const [currentPage, setCurrentPage] = useState(1)
-  const totalPages = 10
+  const [products, setProducts] = useState<Product[]>([])
+  const [totalPages, setTotalPages] = useState(1)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const productsPerPage = 12
 
-  const products = getAllDriedProducts()
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        setLoading(true)
+        setError(null)
+        const response = await productsApi.getAll({
+          page: currentPage,
+          limit: productsPerPage,
+          type: 'dried',
+          isActive: true,
+        })
+
+        if (response.success && response.data) {
+          // Handle both array and nested data structure
+          const responseData = response.data as any
+          const productsData = Array.isArray(responseData) ? responseData : (responseData?.data || [])
+          setProducts(productsData)
+          
+          // Get total pages from response
+          const pagesFromApi = (response as any).pages || responseData?.pages || 1
+          setTotalPages(pagesFromApi)
+        } else {
+          setError(response.message || 'Không thể tải sản phẩm')
+          setProducts([])
+        }
+      } catch (err) {
+        console.error('Error fetching products:', err)
+        setError('Đã xảy ra lỗi khi tải sản phẩm')
+        setProducts([])
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchProducts()
+  }, [currentPage])
 
   const handlePageChange = (page: number) => {
-    setCurrentPage(page)
-    // window.scrollTo({ top: 0, behavior: 'smooth' })
+    if (page >= 1 && page <= totalPages) {
+      setCurrentPage(page)
+      window.scrollTo({ top: 0, behavior: 'smooth' })
+    }
   }
 
   const getPageNumbers = () => {
-    const pages = []
+    const pages: (number | string)[] = []
     const maxVisible = 5
 
     if (totalPages <= maxVisible) {
@@ -51,32 +102,14 @@ export default function DriedFruitsPage() {
       <Header />
       <main>
         {/* Hero Section with Breadcrumb */}
-        <section className="relative min-h-screen pb-8 bg-gray-200">
-          <div className="container w-full h-full mx-auto px-4 max-w-7xl">
-            {/* Breadcrumb */}
-            <div className="absolute bottom-0 right-0 left-0 flex items-center justify-center gap-2 text-sm mb-4">
-              <div className='w-fit bg-white rounded-xl p-2 flex items-center justify-center gap-2'>
-              <Link
-                href="/"
-                className="text-gray-600 hover:text-[#00652E] transition-colors"
-              >
-                Trang chủ
-              </Link>
-              <HiChevronRight className="w-4 h-4 text-gray-400" />
-              <Link
-                href="/products"
-                className="text-gray-600 hover:text-[#00652E] transition-colors"
-              >
-                Sản phẩm
-              </Link>
-              <HiChevronRight className="w-4 h-4 text-gray-400" />
-              <span className="text-[#00652E] font-semibold">
-                Trái cây sấy xuất khẩu
-              </span>
-              </div>
-            </div>
-          </div>
-        </section>
+        <HeroSectionWithBreadcrumb
+          page="products-dried"
+          breadcrumbItems={[
+            { label: 'Trang chủ', href: '/' },
+            { label: 'Sản phẩm', href: '/products' },
+            { label: 'Trái cây sấy xuất khẩu', href: null },
+          ]}
+        />
 
         {/* Product Section */}
         <section className="py-12 md:py-16 bg-gradient-to-br from-white via-[#E6F7ED]/30 to-white">
@@ -86,78 +119,116 @@ export default function DriedFruitsPage() {
               Trái cây sấy xuất khẩu
             </h1>
 
+            {/* Loading State */}
+            {loading && (
+              <div className="text-center py-16">
+                <div className="inline-block animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#00652E]"></div>
+                <p className="mt-4 text-gray-600">Đang tải sản phẩm...</p>
+              </div>
+            )}
+
+            {/* Error State */}
+            {error && !loading && (
+              <div className="text-center py-16">
+                <p className="text-red-600 mb-4">{error}</p>
+                <button
+                  onClick={() => {
+                    setCurrentPage(1)
+                    window.location.reload()
+                  }}
+                  className="button-primary"
+                >
+                  Thử lại
+                </button>
+              </div>
+            )}
+
             {/* Product Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8 mb-12">
-              {products.map((product) => (
-                <ProductCard
-                  key={product.id}
-                  id={product.id}
-                  title={product.title}
-                  description={product.description}
-                  image={product.image}
-                  slug={product.slug}
-                  category="dried"
-                />
-              ))}
-            </div>
+            {!loading && !error && products.length > 0 && (
+              <>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8 mb-12 w-full">
+                  {products.map((product) => (
+                    <ProductCard
+                      key={product.id}
+                      id={product.id}
+                      title={product.title}
+                      description={product.description}
+                      image={product.image}
+                      slug={product.slug}
+                      category="dried"
+                    />
+                  ))}
+                </div>
 
-            {/* Pagination */}
-            <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mt-12">
-              {/* Previous Button */}
-              <button
-                onClick={() => handlePageChange(currentPage - 1)}
-                disabled={currentPage === 1}
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
-                  currentPage === 1
-                    ? 'text-gray-400 cursor-not-allowed'
-                    : 'text-[#00652E] hover:bg-[#00652E] hover:text-white'
-                }`}
-              >
-                <HiChevronLeft className="w-5 h-5" />
-                <span>Trang trước</span>
-              </button>
-
-              {/* Page Numbers */}
-              <div className="flex items-center gap-2">
-                {getPageNumbers().map((page, index) => {
-                  if (page === '...') {
-                    return (
-                      <span key={`ellipsis-${index}`} className="px-2 text-gray-400">
-                        ...
-                      </span>
-                    )
-                  }
-
-                  return (
+                {/* Pagination */}
+                {totalPages > 1 && (
+                  <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mt-12 w-full max-w-4xl">
+                    {/* Previous Button */}
                     <button
-                      key={page}
-                      onClick={() => handlePageChange(page as number)}
-                      className={`w-10 h-10 rounded-lg font-semibold transition-colors ${
-                        currentPage === page
-                          ? 'bg-[#00652E] text-white'
-                          : 'text-gray-600 hover:bg-gray-100'
+                      onClick={() => handlePageChange(currentPage - 1)}
+                      disabled={currentPage === 1 || loading}
+                      className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
+                        currentPage === 1 || loading
+                          ? 'text-gray-400 cursor-not-allowed'
+                          : 'text-[#00652E] hover:bg-[#00652E] hover:text-white'
                       }`}
                     >
-                      {page}
+                      <HiChevronLeft className="w-5 h-5" />
+                      <span>Trang trước</span>
                     </button>
-                  )
-                })}
-              </div>
 
-              {/* Next Button */}
-              <button
-                onClick={() => handlePageChange(currentPage + 1)}
-                disabled={currentPage === totalPages}
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
-                  currentPage === totalPages
-                    ? 'text-gray-400 cursor-not-allowed'
-                    : 'text-[#00652E] hover:bg-[#00652E] hover:text-white'
-                }`}
-              >
-                <span>Tiếp theo</span>
-                <HiChevronRight className="w-5 h-5" />
-              </button>
-            </div>
+                    {/* Page Numbers */}
+                    <div className="flex items-center gap-2">
+                      {getPageNumbers().map((page, index) => {
+                        if (page === '...') {
+                          return (
+                            <span key={`ellipsis-${index}`} className="px-2 text-gray-400">
+                              ...
+                            </span>
+                          )
+                        }
+
+                        return (
+                          <button
+                            key={page}
+                            onClick={() => handlePageChange(page as number)}
+                            disabled={loading}
+                            className={`w-10 h-10 rounded-lg font-semibold transition-colors ${
+                              currentPage === page
+                                ? 'bg-[#00652E] text-white'
+                                : 'text-gray-600 hover:bg-gray-100'
+                            } ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                          >
+                            {page}
+                          </button>
+                        )
+                      })}
+                    </div>
+
+                    {/* Next Button */}
+                    <button
+                      onClick={() => handlePageChange(currentPage + 1)}
+                      disabled={currentPage === totalPages || loading}
+                      className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
+                        currentPage === totalPages || loading
+                          ? 'text-gray-400 cursor-not-allowed'
+                          : 'text-[#00652E] hover:bg-[#00652E] hover:text-white'
+                      }`}
+                    >
+                      <span>Tiếp theo</span>
+                      <HiChevronRight className="w-5 h-5" />
+                    </button>
+                  </div>
+                )}
+              </>
+            )}
+
+            {/* Empty State */}
+            {!loading && !error && products.length === 0 && (
+              <div className="text-center py-16">
+                <p className="text-gray-600 mb-4">Không tìm thấy sản phẩm nào</p>
+              </div>
+            )}
           </div>
         </section>
 
@@ -174,4 +245,3 @@ export default function DriedFruitsPage() {
     </div>
   )
 }
-

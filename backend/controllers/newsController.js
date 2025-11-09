@@ -149,6 +149,7 @@ export const createNews = async (req, res) => {
   try {
     const {
       title,
+      slug,
       category,
       shortDescription,
       content,
@@ -162,29 +163,69 @@ export const createNews = async (req, res) => {
       order,
     } = req.body;
 
-    // Kiểm tra danh mục có tồn tại không
-    const categoryExists = await NewsCategory.findById(category);
-    if (!categoryExists) {
-      return res.status(404).json({
-        success: false,
-        message: 'Không tìm thấy danh mục tin tức',
-      });
+    // Kiểm tra danh mục có tồn tại không (chỉ khi có category được gửi lên)
+    if (category) {
+      const categoryExists = await NewsCategory.findById(category);
+      if (!categoryExists) {
+        return res.status(404).json({
+          success: false,
+          message: 'Không tìm thấy danh mục tin tức',
+        });
+      }
     }
 
-    const news = await News.create({
-      title,
-      category,
-      shortDescription,
-      content,
-      featuredImage,
-      images: images || [],
-      author: author || 'Tấn Phát Food',
-      tags: tags || [],
-      publishedAt: publishedAt || new Date(),
-      isPublished: isPublished !== undefined ? isPublished : false,
-      isFeatured: isFeatured !== undefined ? isFeatured : false,
-      order: order || 0,
-    });
+    // Build news data object - only include fields that are provided
+    const newsData = {
+      title: title || '',
+    };
+
+    // Only include optional fields if they are provided
+    if (slug && slug.trim()) {
+      newsData.slug = slug.trim();
+    }
+
+    if (category) {
+      newsData.category = category;
+    }
+
+    if (shortDescription !== undefined) {
+      newsData.shortDescription = shortDescription && shortDescription.trim() ? shortDescription.trim() : '';
+    }
+
+    if (content !== undefined) {
+      newsData.content = content && content.trim() ? content.trim() : '';
+    }
+
+    if (featuredImage && featuredImage.trim()) {
+      newsData.featuredImage = featuredImage.trim();
+    }
+
+    if (images && Array.isArray(images) && images.length > 0) {
+      newsData.images = images.filter(img => img && img.trim());
+    }
+
+    if (author && author.trim()) {
+      newsData.author = author.trim();
+    } else {
+      newsData.author = 'Tấn Phát Food';
+    }
+
+    if (tags && Array.isArray(tags) && tags.length > 0) {
+      newsData.tags = tags.filter(tag => tag && tag.trim());
+    }
+
+    if (publishedAt) {
+      newsData.publishedAt = publishedAt;
+    } else {
+      newsData.publishedAt = new Date();
+    }
+
+    // Status fields - always include with defaults
+    newsData.isPublished = isPublished !== undefined ? isPublished : false;
+    newsData.isFeatured = isFeatured !== undefined ? isFeatured : false;
+    newsData.order = order !== undefined && order !== null ? order : 0;
+
+    const news = await News.create(newsData);
 
     const populatedNews = await News.findById(news._id)
       .populate('category', 'name slug')
@@ -226,9 +267,25 @@ export const updateNews = async (req, res) => {
       });
     }
 
-    // Kiểm tra danh mục nếu có thay đổi
-    if (req.body.category) {
-      const categoryExists = await NewsCategory.findById(req.body.category);
+    const {
+      title,
+      slug,
+      category,
+      shortDescription,
+      content,
+      featuredImage,
+      images,
+      author,
+      tags,
+      publishedAt,
+      isPublished,
+      isFeatured,
+      order,
+    } = req.body;
+
+    // Kiểm tra danh mục nếu có thay đổi và có giá trị
+    if (category && category !== null && category !== '') {
+      const categoryExists = await NewsCategory.findById(category);
       if (!categoryExists) {
         return res.status(404).json({
           success: false,
@@ -237,27 +294,78 @@ export const updateNews = async (req, res) => {
       }
     }
 
-    // Cập nhật từng trường
-    const fields = [
-      'title',
-      'category',
-      'shortDescription',
-      'content',
-      'featuredImage',
-      'images',
-      'author',
-      'tags',
-      'publishedAt',
-      'isPublished',
-      'isFeatured',
-      'order',
-    ];
+    // Update required fields
+    if (title !== undefined && title !== null) {
+      news.title = title.trim();
+    }
 
-    fields.forEach((field) => {
-      if (req.body[field] !== undefined) {
-        news[field] = req.body[field];
+    // Update slug - if provided and not empty, update it
+    if (slug !== undefined) {
+      if (slug && slug.trim()) {
+        news.slug = slug.trim();
       }
-    });
+      // If slug is empty string, don't update (keep existing or let pre-save hook regenerate)
+    }
+
+    // Update category - can be set to null to remove
+    if (category !== undefined) {
+      if (category === null || category === '') {
+        news.category = undefined;
+      } else {
+        news.category = category;
+      }
+    }
+
+    // Update optional fields - only if provided
+    if (shortDescription !== undefined) {
+      news.shortDescription = shortDescription && shortDescription.trim() ? shortDescription.trim() : '';
+    }
+
+    if (content !== undefined) {
+      news.content = content && content.trim() ? content.trim() : '';
+    }
+
+    if (featuredImage !== undefined) {
+      news.featuredImage = featuredImage && featuredImage.trim() ? featuredImage.trim() : '';
+    }
+
+    // Update arrays - only if provided
+    if (images !== undefined) {
+      if (Array.isArray(images)) {
+        news.images = images.filter(img => img && img.trim());
+      } else {
+        news.images = [];
+      }
+    }
+
+    if (tags !== undefined) {
+      if (Array.isArray(tags)) {
+        news.tags = tags.filter(tag => tag && tag.trim());
+      } else {
+        news.tags = [];
+      }
+    }
+
+    if (author !== undefined) {
+      news.author = author && author.trim() ? author.trim() : 'Tấn Phát Food';
+    }
+
+    if (publishedAt !== undefined) {
+      news.publishedAt = publishedAt || new Date();
+    }
+
+    // Update status fields - only if provided
+    if (isPublished !== undefined) {
+      news.isPublished = isPublished;
+    }
+
+    if (isFeatured !== undefined) {
+      news.isFeatured = isFeatured;
+    }
+
+    if (order !== undefined && order !== null) {
+      news.order = order;
+    }
 
     await news.save();
 

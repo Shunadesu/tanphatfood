@@ -1,12 +1,59 @@
 'use client'
 
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { getAllPowderProducts } from '@/data/mockProducts'
 import { HiPlus } from 'react-icons/hi'
 import ProductCard from '@/components/ProductCard'
+import { productsApi } from '@/services/api'
+
+interface Product {
+  id: string
+  title: string
+  description: string
+  shortDescription?: string
+  image: string
+  slug: string
+  type: 'fresh' | 'dried' | 'powder'
+}
 
 const PowderedFruitsSection = () => {
-  const powderedProducts = getAllPowderProducts().slice(0, 6) // Lấy 6 sản phẩm đầu tiên
+  const [products, setProducts] = useState<Product[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        setLoading(true)
+        const response = await productsApi.getAll({
+          type: 'powder',
+          isActive: true,
+          limit: 6,
+        })
+
+        if (response.success) {
+          // Backend returns: { success: true, data: [...], count, total, page, pages }
+          let productsData: Product[] = []
+          
+          if (Array.isArray(response.data)) {
+            productsData = response.data
+          } else if (response.data && typeof response.data === 'object' && 'data' in response.data) {
+            // Nested structure
+            productsData = Array.isArray((response.data as any).data) 
+              ? (response.data as any).data 
+              : []
+          }
+          
+          setProducts(productsData)
+        }
+      } catch (error) {
+        console.error('Error fetching powder products:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchProducts()
+  }, [])
 
   return (
     <section className="py-16 md:py-20 bg-gradient-to-br from-white via-[#E6F7ED]/30 to-white">
@@ -22,19 +69,31 @@ const PowderedFruitsSection = () => {
         </div>
 
         {/* Products Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 mb-12">
-          {powderedProducts.map((product) => (
-            <ProductCard
-              key={product.id}
-              id={product.id}
-              title={product.title}
-              description={product.description}
-              image={product.image}
-              slug={product.slug}
-              category="powder"
-            />
-          ))}
-        </div>
+        {loading ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 mb-12">
+            {[...Array(6)].map((_, index) => (
+              <div key={index} className="bg-gray-200 animate-pulse rounded-2xl h-80" />
+            ))}
+          </div>
+        ) : products.length > 0 ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 mb-12">
+            {products.map((product) => (
+              <ProductCard
+                key={product.id}
+                id={product.id}
+                title={product.title}
+                description={product.shortDescription || product.description || ''}
+                image={product.image || '/images/placeholder.jpg'}
+                slug={product.slug}
+                category="powder"
+              />
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-12 text-gray-500">
+            Không có sản phẩm nào
+          </div>
+        )}
 
         {/* CTA Button */}
         <div className="text-center">

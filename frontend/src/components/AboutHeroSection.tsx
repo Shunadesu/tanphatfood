@@ -16,7 +16,7 @@ const AboutHeroSection = () => {
         <div className="absolute inset-0 bg-gradient-to-r from-black/50 via-black/20 to-transparent" />
       </div>
 
-      <div className="absolute bottom-0 left-0 right-0 z-0 bg-gradient-to-t from-[#00652E]/90 via-[#00652E]/70 to-transparent rounded-br-[70px] rounded-bl-[70px] overflow-hidden h-[250px]">
+      <div className="hidden lg:block absolute bottom-0 left-0 right-0 z-0 bg-gradient-to-t from-[#00652E]/90 via-[#00652E]/70 to-transparent rounded-br-[70px] rounded-bl-[70px] overflow-hidden h-[250px]">
         <div className='container mx-auto z-20 flex items-center justify-center absolute bottom-0 left-0 right-0'>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 w-full">
             {/* Panel 1: Hơn 10 năm kinh nghiệm */}

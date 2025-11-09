@@ -7,7 +7,7 @@ const VideoSection = () => {
   const [isPlaying, setIsPlaying] = useState(false)
 
   return (
-    <section className="relative min-h-screen bg-white flex items-center">
+    <section className="relative h-auto py-8 min-h-[70vh] md:min-h-screen bg-white flex items-center">
       <div className="container mx-auto px-4 max-w-7xl w-full">
         {/* Video Container */}
         <div className="w-full">

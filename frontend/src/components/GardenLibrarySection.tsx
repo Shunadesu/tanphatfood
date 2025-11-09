@@ -50,13 +50,13 @@ const GardenLibrarySection = () => {
         </div>
 
         {/* Image Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 mb-10 md:mb-12">
+        <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 mb-10 md:mb-12">
           {gardenImages.map((item) => (
             <div
               key={item.id}
               className="relative group rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 bg-white"
             >
-              <div className="aspect-square w-full overflow-hidden">
+              <div className="aspect-16/9 w-full overflow-hidden">
                 <img
                   src={item.image}
                   alt={item.alt}

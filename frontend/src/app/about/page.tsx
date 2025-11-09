@@ -24,32 +24,10 @@ export default function AboutPage() {
       <main>
         {/* Hero Section */}
         <AboutHeroSection />
-        
-        {/* Breadcrumb Section */}
-        <section className="relative py-8 bg-gray-50">
-          <div className="container mx-auto px-4 max-w-7xl">
-            <div className="flex items-center justify-center gap-2 text-sm">
-              <div className='w-fit bg-white rounded-xl p-2 flex items-center justify-center gap-2 shadow-md'>
-              <Link
-                href="/"
-                className="text-gray-600 hover:text-[#00652E] transition-colors"
-              >
-                Trang chủ
-              </Link>
-              <HiChevronRight className="w-4 h-4 text-gray-400" />
-              <span className="text-[#00652E] font-semibold">
-                Giới thiệu
-              </span>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* About Section */}
-        {/* <AboutSection /> */}
+      
 
         {/* Standards Section */}
-        <StandardsSection />
+        {/* <StandardsSection /> */}
 
         {/* Partners Section - Statistics */}
         <PartnersSection />

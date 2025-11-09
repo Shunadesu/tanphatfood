@@ -19,6 +19,7 @@ import NewsSection from '@/components/NewsSection'
 import Footer from '@/components/Footer'
 import FloatingContactButtons from '@/components/FloatingContactButtons'
 import ScrollToTop from '@/components/ScrollToTop'
+import QuoteSection from '@/components/QuoteSection'
 
 export default function Home() {
   return (
@@ -36,7 +37,8 @@ export default function Home() {
       <ProcessSection />
       <ConnectionSection />
       <VideoSection />
-      <BackgroundSection />
+      <QuoteSection />
+      {/* <BackgroundSection /> */}
       <PartnersCustomersSection />
       <TestimonialsSection />
       <GardenLibrarySection />

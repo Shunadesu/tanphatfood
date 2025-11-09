@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import Link from 'next/link'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
@@ -9,35 +9,75 @@ import ArticleCard from '@/components/ArticleCard'
 import FloatingContactButtons from '@/components/FloatingContactButtons'
 import ScrollToTop from '@/components/ScrollToTop'
 import { HiChevronRight, HiSearch, HiX } from 'react-icons/hi'
-import { getAllHandbook } from '@/data/mockHandbook'
+import { newsApi } from '@/services/api'
+
+interface Article {
+  id: string
+  title: string
+  description: string
+  image: string
+  date: string
+  slug: string
+  category?: string
+}
 
 export default function HandbookPage() {
   const [searchQuery, setSearchQuery] = useState('')
   const [currentPage, setCurrentPage] = useState(1)
+  const [articles, setArticles] = useState<Article[]>([])
+  const [totalPages, setTotalPages] = useState(1)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
   const articlesPerPage = 12
 
-  const allArticles = getAllHandbook()
+  useEffect(() => {
+    const fetchArticles = async () => {
+      try {
+        setLoading(true)
+        setError(null)
+        const response = await newsApi.getAll({
+          page: currentPage,
+          limit: articlesPerPage,
+          isPublished: true,
+          search: searchQuery.trim() || undefined,
+        })
 
-  // Filter articles by search query
-  const filteredArticles = useMemo(() => {
-    if (!searchQuery.trim()) {
-      return allArticles
+        if (response.success && response.data) {
+          // Handle both array and nested data structure
+          const responseData = response.data as any
+          const articlesData = Array.isArray(responseData) ? responseData : (responseData?.data || [])
+          
+          // Transform news data to article format
+          const transformedArticles: Article[] = articlesData.map((news: any) => ({
+            id: String(news.id || news._id),
+            title: news.title,
+            description: news.excerpt || news.description || '',
+            image: news.image || news.thumbnail || '',
+            date: news.publishedAt || news.createdAt || news.date || '',
+            slug: news.slug,
+            category: news.category,
+          }))
+
+          setArticles(transformedArticles)
+          
+          // Get total pages from response
+          const pagesFromApi = (response as any).pages || responseData?.pages || 1
+          setTotalPages(pagesFromApi)
+        } else {
+          setError(response.message || 'Không thể tải bài viết')
+          setArticles([])
+        }
+      } catch (err) {
+        console.error('Error fetching articles:', err)
+        setError('Đã xảy ra lỗi khi tải bài viết')
+        setArticles([])
+      } finally {
+        setLoading(false)
+      }
     }
 
-    const query = searchQuery.toLowerCase().trim()
-    return allArticles.filter(
-      (article) =>
-        article.title.toLowerCase().includes(query) ||
-        article.description.toLowerCase().includes(query) ||
-        (article.category && article.category.toLowerCase().includes(query))
-    )
-  }, [allArticles, searchQuery])
-
-  // Pagination
-  const totalPages = Math.ceil(filteredArticles.length / articlesPerPage)
-  const startIndex = (currentPage - 1) * articlesPerPage
-  const endIndex = startIndex + articlesPerPage
-  const paginatedArticles = filteredArticles.slice(startIndex, endIndex)
+    fetchArticles()
+  }, [currentPage, searchQuery])
 
   // Reset to page 1 when search changes
   const handleSearchChange = (value: string) => {
@@ -51,12 +91,14 @@ export default function HandbookPage() {
   }
 
   const handlePageChange = (page: number) => {
-    setCurrentPage(page)
-    window.scrollTo({ top: 0, behavior: 'smooth' })
+    if (page >= 1 && page <= totalPages) {
+      setCurrentPage(page)
+      window.scrollTo({ top: 0, behavior: 'smooth' })
+    }
   }
 
   const getPageNumbers = () => {
-    const pages = []
+    const pages: (number | string)[] = []
     const maxVisible = 5
 
     if (totalPages <= maxVisible) {
@@ -76,13 +118,13 @@ export default function HandbookPage() {
     return pages
   }
 
-  // Get unique categories
+  // Get unique categories from articles
   const categories = useMemo(() => {
-    const cats = allArticles
+    const cats = articles
       .map((article) => article.category)
       .filter((cat): cat is string => cat !== undefined)
     return Array.from(new Set(cats))
-  }, [allArticles])
+  }, [articles])
 
   return (
     <div className="min-h-screen bg-white">
@@ -90,24 +132,6 @@ export default function HandbookPage() {
       <main>
         {/* Hero Section */}
         <HandbookHeroSection />
-
-        {/* Breadcrumb Section */}
-        <section className="relative py-8 bg-gray-50">
-          <div className="container mx-auto px-4 max-w-7xl">
-            <div className="flex items-center justify-center gap-2 text-sm">
-              <div className="w-fit bg-white rounded-xl p-2 flex items-center justify-center gap-2 shadow-md">
-                <Link
-                  href="/"
-                  className="text-gray-600 hover:text-[#00652E] transition-colors"
-                >
-                  Trang chủ
-                </Link>
-                <HiChevronRight className="w-4 h-4 text-gray-400" />
-                <span className="text-[#00652E] font-semibold">Cẩm nang</span>
-              </div>
-            </div>
-          </div>
-        </section>
 
         {/* Articles Section */}
         <section className="py-12 md:py-16 bg-gradient-to-br from-white via-[#E6F7ED]/30 to-white">
@@ -143,25 +167,52 @@ export default function HandbookPage() {
               </div>
             </div>
 
+            {/* Loading State */}
+            {loading && (
+              <div className="text-center py-16">
+                <div className="inline-block animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#00652E]"></div>
+                <p className="mt-4 text-gray-600">Đang tải bài viết...</p>
+              </div>
+            )}
+
+            {/* Error State */}
+            {error && !loading && (
+              <div className="text-center py-16">
+                <p className="text-red-600 mb-4">{error}</p>
+                <button
+                  onClick={() => {
+                    setCurrentPage(1)
+                    setSearchQuery('')
+                    window.location.reload()
+                  }}
+                  className="button-primary"
+                >
+                  Thử lại
+                </button>
+              </div>
+            )}
+
             {/* Results Count */}
-            <div className="mb-6 text-center">
-              <p className="text-gray-600">
-                Tìm thấy <span className="font-bold text-[#00652E]">{filteredArticles.length}</span>{' '}
-                bài viết
-                {searchQuery && (
-                  <span>
-                    {' '}
-                    cho từ khóa &ldquo;<span className="font-semibold">{searchQuery}</span>&rdquo;
-                  </span>
-                )}
-              </p>
-            </div>
+            {!loading && !error && (
+              <div className="mb-6 text-center">
+                <p className="text-gray-600">
+                  Tìm thấy <span className="font-bold text-[#00652E]">{articles.length}</span>{' '}
+                  bài viết
+                  {searchQuery && (
+                    <span>
+                      {' '}
+                      cho từ khóa &ldquo;<span className="font-semibold">{searchQuery}</span>&rdquo;
+                    </span>
+                  )}
+                </p>
+              </div>
+            )}
 
             {/* Articles Grid */}
-            {paginatedArticles.length > 0 ? (
+            {!loading && !error && articles.length > 0 ? (
               <>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 mb-12">
-                  {paginatedArticles.map((article) => (
+                  {articles.map((article) => (
                     <ArticleCard
                       key={article.id}
                       id={article.id}
@@ -182,9 +233,9 @@ export default function HandbookPage() {
                     {/* Previous Button */}
                     <button
                       onClick={() => handlePageChange(currentPage - 1)}
-                      disabled={currentPage === 1}
+                      disabled={currentPage === 1 || loading}
                       className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
-                        currentPage === 1
+                        currentPage === 1 || loading
                           ? 'text-gray-400 cursor-not-allowed'
                           : 'text-[#00652E] hover:bg-[#00652E] hover:text-white'
                       }`}
@@ -208,11 +259,12 @@ export default function HandbookPage() {
                           <button
                             key={page}
                             onClick={() => handlePageChange(page as number)}
+                            disabled={loading}
                             className={`w-10 h-10 rounded-lg font-semibold transition-colors ${
                               currentPage === page
                                 ? 'bg-[#00652E] text-white'
                                 : 'text-gray-600 hover:bg-gray-100'
-                            }`}
+                            } ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
                           >
                             {page}
                           </button>
@@ -223,9 +275,9 @@ export default function HandbookPage() {
                     {/* Next Button */}
                     <button
                       onClick={() => handlePageChange(currentPage + 1)}
-                      disabled={currentPage === totalPages}
+                      disabled={currentPage === totalPages || loading}
                       className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
-                        currentPage === totalPages
+                        currentPage === totalPages || loading
                           ? 'text-gray-400 cursor-not-allowed'
                           : 'text-[#00652E] hover:bg-[#00652E] hover:text-white'
                       }`}
@@ -236,7 +288,7 @@ export default function HandbookPage() {
                   </div>
                 )}
               </>
-            ) : (
+            ) : !loading && !error ? (
               <div className="text-center py-16">
                 <p className="text-xl text-gray-600 mb-4">Không tìm thấy bài viết nào</p>
                 <p className="text-gray-500 mb-6">
@@ -252,7 +304,7 @@ export default function HandbookPage() {
                   Xóa bộ lọc
                 </button>
               </div>
-            )}
+            ) : null}
           </div>
         </section>
       </main>
@@ -262,4 +314,3 @@ export default function HandbookPage() {
     </div>
   )
 }
-

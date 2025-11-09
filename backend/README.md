@@ -102,26 +102,71 @@ npm start
 - `GET /api/products` - Lấy tất cả sản phẩm
   - Query params: 
     - `category` - ID danh mục
+    - `type` - Loại sản phẩm: `fresh`, `dried`, hoặc `powder`
     - `isActive` - true/false
     - `isFeatured` - true/false
     - `search` - Tìm kiếm theo tên/mô tả
-    - `page` - Số trang
-    - `limit` - Số lượng mỗi trang
+    - `page` - Số trang (mặc định: 1)
+    - `limit` - Số lượng mỗi trang (mặc định: 10)
+  - **Response format:** Tất cả sản phẩm được transform với `title` thay vì `name` để khớp với frontend
 
 - `GET /api/products/:id` - Lấy sản phẩm theo ID
+  - **Response:** Sản phẩm được transform với format khớp frontend
 
 - `GET /api/products/slug/:slug` - Lấy sản phẩm theo slug
+  - **Response:** Sản phẩm được transform với format khớp frontend
+
+- `GET /api/products/type/:type` - Lấy sản phẩm theo type
+  - Params: `type` - `fresh`, `dried`, hoặc `powder`
+  - Query params:
+    - `isActive` - true/false
+    - `category` - ID danh mục
+    - `page` - Số trang (mặc định: 1)
+    - `limit` - Số lượng mỗi trang (mặc định: 10)
 
 - `GET /api/products/category/:categoryId` - Lấy sản phẩm theo danh mục
+  - Query params:
+    - `isActive` - true/false
+    - `type` - Loại sản phẩm: `fresh`, `dried`, hoặc `powder`
+    - `page` - Số trang (mặc định: 1)
+    - `limit` - Số lượng mỗi trang (mặc định: 10)
 
 - `POST /api/products` - Tạo sản phẩm mới
   ```json
   {
     "name": "Sầu riêng Ri6",
+    "title": "Sầu riêng Ri6", // Có thể dùng title thay vì name
     "category": "category-id",
+    "type": "fresh", // required: "fresh", "dried", hoặc "powder"
     "description": "Mô tả sản phẩm",
     "shortDescription": "Mô tả ngắn",
+    "image": "url-main-image",
     "images": ["url1", "url2"],
+    "features": ["Đặc điểm 1", "Đặc điểm 2"],
+    "exportInfo": {
+      "variety": "Ri6 / Monthong",
+      "weight": "1.5-4.5kg/trái",
+      "packaging": "Thùng carton 10-12kg",
+      "condition": "Nguyên trái hoặc tách múi cấp đông"
+    },
+    "companyIntro": "Giới thiệu về công ty",
+    "qualityDescription": "Mô tả về chất lượng",
+    "qualityImage": "url-quality-image",
+    "certifications": {
+      "haccp": true,
+      "globalgap": true,
+      "vietgap": true,
+      "co": "Đầy đủ các form D, E, RCEP"
+    },
+    "markets": ["Trung Quốc", "Hàn Quốc", "Singapore"],
+    "supplyCapacity": "100-150 tấn/tháng",
+    "detailedInfo": {
+      "brand": "Tấn Phát Food",
+      "origin": "Việt Nam",
+      "fruitType": "Sầu riêng hạt lép",
+      "storageInstructions": "Bảo quản nơi khô ráo, tránh ánh nắng"
+    },
+    "fullDescription": "<div>Mô tả chi tiết HTML...</div>",
     "price": 100000,
     "unit": "kg",
     "specifications": {
@@ -133,8 +178,11 @@ npm start
     "order": 0
   }
   ```
+  - **Response:** Sản phẩm được transform với format khớp frontend (trả về `title` thay vì `name`)
 
 - `PUT /api/products/:id` - Cập nhật sản phẩm
+  - Body: Tương tự như POST, có thể gửi `title` thay vì `name`
+  - **Response:** Sản phẩm được transform với format khớp frontend
 
 - `DELETE /api/products/:id` - Xóa sản phẩm
 
@@ -268,19 +316,48 @@ npm start
 - `createdAt`, `updatedAt` (auto)
 
 ### Product
-- `name` (String, required)
+- `name` (String, required) - Tên sản phẩm (backend), frontend nhận là `title`
 - `slug` (String, auto-generated, unique)
 - `category` (ObjectId, ref: Category, required)
-- `description` (String)
-- `shortDescription` (String)
-- `images` (Array of String)
+- `type` (String, enum: ['fresh', 'dried', 'powder'], required) - Loại sản phẩm
+- `description` (String) - Mô tả sản phẩm
+- `shortDescription` (String) - Mô tả ngắn
+- `image` (String) - Ảnh chính
+- `images` (Array of String) - Danh sách ảnh
+- `features` (Array of String) - Đặc điểm nổi bật
+- `exportInfo` (Object) - Thông tin xuất khẩu
+  - `variety` (String) - Loại giống
+  - `weight` (String) - Trọng lượng
+  - `packaging` (String) - Đóng gói
+  - `condition` (String) - Tình trạng
+- `companyIntro` (String) - Giới thiệu công ty
+- `qualityDescription` (String) - Mô tả chất lượng
+- `qualityImage` (String) - Ảnh chất lượng
+- `certifications` (Object) - Chứng nhận
+  - `haccp` (Boolean)
+  - `globalgap` (Boolean)
+  - `vietgap` (Boolean)
+  - `co` (String) - Giấy chứng nhận xuất xứ
+- `markets` (Array of String) - Thị trường xuất khẩu
+- `supplyCapacity` (String) - Năng lực cung ứng
+- `detailedInfo` (Object) - Thông tin chi tiết
+  - `brand` (String) - Thương hiệu
+  - `origin` (String) - Xuất xứ
+  - `fruitType` (String) - Loại trái cây
+  - `storageInstructions` (String) - Hướng dẫn bảo quản
+- `fullDescription` (String) - Mô tả chi tiết (HTML)
 - `price` (Number)
 - `unit` (String)
-- `specifications` (Map)
-- `isActive` (Boolean)
-- `isFeatured` (Boolean)
-- `order` (Number)
+- `specifications` (Map) - Thông số kỹ thuật
+- `isActive` (Boolean, default: true)
+- `isFeatured` (Boolean, default: false)
+- `order` (Number, default: 0)
 - `createdAt`, `updatedAt` (auto)
+
+**Lưu ý:** 
+- API response sẽ transform `name` thành `title` và `_id` thành `id` để khớp với frontend
+- `category` trong response sẽ là tên danh mục (string) thay vì ObjectId
+- Tất cả các trường optional sẽ có giá trị mặc định phù hợp
 
 ### NewsCategory
 - `name` (String, required, unique)

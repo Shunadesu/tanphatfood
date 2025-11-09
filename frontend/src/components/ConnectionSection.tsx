@@ -42,7 +42,7 @@ Tấn Phát Food cam kết phát triển bền vững, hỗ trợ nông dân đ�
       {/* White Content Box - Fixed at bottom */}
       <div className="absolute bottom-0 left-0 right-0 z-10">
         <div className="container mx-auto px-4 max-w-7xl">
-          <div className="bg-white rounded-t-[30px] p-8 md:p-10 lg:p-12 shadow-2xl">
+          <div className="bg-white rounded-t-[30px] p-8 md:p-10 lg:p-12">
             {/* Title */}
             <h2 className="title">
               Tấn Phát Food – Kết nối nông sản Việt với thị trường toàn cầu

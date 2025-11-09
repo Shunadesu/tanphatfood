@@ -9,14 +9,15 @@ const newsSchema = new mongoose.Schema(
     },
     slug: {
       type: String,
-      required: true,
+      required: false, // Sẽ được tự động tạo từ title nếu không có
       unique: true,
+      sparse: true, // Cho phép nhiều document không có slug (chỉ unique khi có giá trị)
       lowercase: true,
     },
     category: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'NewsCategory',
-      required: [true, 'Danh mục tin tức là bắt buộc'],
+      required: false, // Không bắt buộc, có thể cập nhật sau
     },
     shortDescription: {
       type: String,
@@ -24,7 +25,7 @@ const newsSchema = new mongoose.Schema(
     },
     content: {
       type: String,
-      required: [true, 'Nội dung tin tức là bắt buộc'],
+      required: false, // Không bắt buộc, có thể tạo draft trước
     },
     featuredImage: {
       type: String,
@@ -71,10 +72,33 @@ const newsSchema = new mongoose.Schema(
   }
 );
 
-// Tạo slug tự động từ title
-newsSchema.pre('save', function (next) {
-  if (this.isModified('title') && !this.slug) {
-    this.slug = this.title
+// Tạo slug tự động từ title nếu không có
+newsSchema.pre('save', async function (next) {
+  // Nếu không có slug hoặc slug bị thay đổi và rỗng
+  if (!this.slug || this.slug === '') {
+    let baseSlug = this.title
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/đ/g, 'd')
+      .replace(/Đ/g, 'D')
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/(^-|-$)/g, '');
+    
+    // Đảm bảo slug là unique
+    let slug = baseSlug;
+    let counter = 1;
+    const News = mongoose.model('News');
+    
+    while (await News.findOne({ slug, _id: { $ne: this._id } })) {
+      slug = `${baseSlug}-${counter}`;
+      counter++;
+    }
+    
+    this.slug = slug;
+  } else {
+    // Nếu có slug, đảm bảo format đúng
+    this.slug = this.slug
       .toLowerCase()
       .normalize('NFD')
       .replace(/[\u0300-\u036f]/g, '')

@@ -4,7 +4,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 
 interface ProductCardProps {
-  id: number
+  id: number | string
   title: string
   description: string
   image: string
