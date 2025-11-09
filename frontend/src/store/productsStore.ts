@@ -140,7 +140,7 @@ export const useProductsStore = create<ProductsState>((set, get) => ({
   cachedProducts: {},
   productBySlug: {},
   loading: false,
-  loadedTypes: new Set<string>(),
+  loadedTypes: [],
   
   initializeFromStorage: () => {
     if (typeof window === 'undefined') return
@@ -247,14 +247,15 @@ export const useProductsStore = create<ProductsState>((set, get) => ({
       
       // Also update productsByType if type is specified
       if (apiParams.type && ['fresh', 'dried', 'powder'].includes(apiParams.type)) {
+        const productType = apiParams.type as 'fresh' | 'dried' | 'powder'
         set((prevState) => ({
           productsByType: {
             ...prevState.productsByType,
-            [apiParams.type]: products,
+            [productType]: products,
           },
-          loadedTypes: prevState.loadedTypes.includes(apiParams.type)
+          loadedTypes: prevState.loadedTypes.includes(productType)
             ? prevState.loadedTypes
-            : [...prevState.loadedTypes, apiParams.type],
+            : [...prevState.loadedTypes, productType],
         }))
       }
       
