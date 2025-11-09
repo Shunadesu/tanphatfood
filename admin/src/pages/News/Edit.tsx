@@ -52,7 +52,14 @@ export default function NewsEdit() {
     try {
       const response = await newsCategoriesApi.getAll()
       if (response.success) {
-        setCategories(response.data?.data || response.data || [])
+        const responseData = response.data as any
+        if (Array.isArray(responseData)) {
+          setCategories(responseData)
+        } else if (responseData?.data && Array.isArray(responseData.data)) {
+          setCategories(responseData.data)
+        } else {
+          setCategories([])
+        }
       }
     } catch (error) {
       console.error('Error fetching categories:', error)
@@ -66,7 +73,7 @@ export default function NewsEdit() {
       setLoadingNews(true)
       const response = await newsApi.getById(id)
       if (response.success && response.data) {
-        const news = response.data
+        const news = response.data as any
         
         // Handle category - can be string (category name) or ObjectId
         // Backend returns category as populated object with name, but we need the ID

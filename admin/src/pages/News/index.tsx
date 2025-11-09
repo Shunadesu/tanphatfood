@@ -45,7 +45,14 @@ export default function News() {
     try {
       const response = await newsCategoriesApi.getAll()
       if (response.success) {
-        setCategories(response.data?.data || response.data || [])
+        const responseData = response.data as any
+        if (Array.isArray(responseData)) {
+          setCategories(responseData)
+        } else if (responseData?.data && Array.isArray(responseData.data)) {
+          setCategories(responseData.data)
+        } else {
+          setCategories([])
+        }
       }
     } catch (error) {
       console.error('Error fetching categories:', error)
@@ -66,17 +73,18 @@ export default function News() {
       if (response.success) {
         let newsData = []
         let totalPagesData = 1
+        const responseData = response.data as any
         
-        if (Array.isArray(response.data)) {
-          newsData = response.data
-        } else if (response.data && Array.isArray(response.data.data)) {
-          newsData = response.data.data
-          totalPagesData = response.data.pages || response.pages || 1
+        if (Array.isArray(responseData)) {
+          newsData = responseData
+        } else if (responseData && Array.isArray(responseData.data)) {
+          newsData = responseData.data
+          totalPagesData = responseData.pages || (response as any).pages || 1
         } else {
           newsData = []
         }
         
-        totalPagesData = response.pages || response.data?.pages || 1
+        totalPagesData = (response as any).pages || responseData?.pages || 1
         
         // Map _id to id for consistency
         newsData = newsData.map((item: any) => ({

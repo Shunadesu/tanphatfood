@@ -69,7 +69,14 @@ export default function ProductNew() {
     try {
       const response = await categoriesApi.getAll()
       if (response.success) {
-        setCategories(response.data?.data || response.data || [])
+        const responseData = response.data as any
+        if (Array.isArray(responseData)) {
+          setCategories(responseData)
+        } else if (responseData?.data && Array.isArray(responseData.data)) {
+          setCategories(responseData.data)
+        } else {
+          setCategories([])
+        }
       }
     } catch (error) {
       console.error('Error fetching categories:', error)

@@ -30,11 +30,13 @@ export default function Dashboard() {
         categoriesApi.getAll(),
       ])
 
+      const productsData = productsRes.data as any
+      const categoriesData = categoriesRes.data as any
       setStats({
-        totalProducts: productsRes.data?.total || 0,
-        totalCategories: categoriesRes.data?.count || categoriesRes.data?.length || 0,
+        totalProducts: productsData?.total || productsRes.total || 0,
+        totalCategories: categoriesData?.count || (Array.isArray(categoriesData) ? categoriesData.length : 0) || categoriesRes.count || 0,
         totalNews: 0,
-        activeProducts: productsRes.data?.total || 0,
+        activeProducts: productsData?.total || productsRes.total || 0,
       })
     } catch (error) {
       console.error('Error fetching stats:', error)

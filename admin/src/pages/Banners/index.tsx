@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
-import { HiPlus, HiPencil, HiTrash, HiSearch, HiEye, HiPhotograph } from 'react-icons/hi'
-import { bannersApi, uploadApi } from '../../services/api'
+import { Link } from 'react-router-dom'
+import { HiPlus, HiPencil, HiTrash, HiSearch, HiPhotograph } from 'react-icons/hi'
+import { bannersApi } from '../../services/api'
 
 interface Banner {
   id: string
@@ -29,7 +29,6 @@ const pageLabels: Record<string, string> = {
 }
 
 export default function Banners() {
-  const navigate = useNavigate()
   const [banners, setBanners] = useState<Banner[]>([])
   const [loading, setLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState('')

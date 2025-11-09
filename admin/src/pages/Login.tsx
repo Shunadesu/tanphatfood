@@ -1,6 +1,5 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { authApi } from '../services/api'
 
 interface LoginProps {
   onLogin: () => void

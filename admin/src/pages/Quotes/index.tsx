@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
-import { HiPencil, HiTrash, HiEye, HiSearch, HiMail, HiPhone, HiOfficeBuilding } from 'react-icons/hi'
+import { HiTrash, HiEye, HiSearch, HiMail, HiPhone, HiOfficeBuilding } from 'react-icons/hi'
 import { quotesApi } from '../../services/api'
 
 interface Quote {
@@ -44,7 +43,6 @@ const statusColors: Record<string, string> = {
 }
 
 export default function Quotes() {
-  const navigate = useNavigate()
   const [quotes, setQuotes] = useState<Quote[]>([])
   const [loading, setLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState('')
@@ -77,11 +75,14 @@ export default function Quotes() {
       const response = await quotesApi.getAll(params)
 
       if (response.success) {
-        const quotesData = Array.isArray(response.data)
-          ? response.data
-          : (response.data as any)?.data || []
+        const responseData = response.data as any
+        const quotesData = Array.isArray(responseData)
+          ? responseData
+          : (responseData?.data && Array.isArray(responseData.data))
+          ? responseData.data
+          : []
         setQuotes(quotesData)
-        setTotalPages(response.pages || 1)
+        setTotalPages((response as any).pages || responseData?.pages || 1)
       } else {
         console.error('API Error:', response.message || response.error)
         setQuotes([])

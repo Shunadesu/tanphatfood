@@ -6,6 +6,11 @@ export interface ApiResponse<T = any> {
   message?: string
   data?: T
   error?: string
+  // Pagination info (may be at top level or nested in data)
+  count?: number
+  total?: number
+  page?: number
+  pages?: number
 }
 
 // Helper function to handle API calls
@@ -590,7 +595,7 @@ export const bannersApi = {
 
 // Auth API (if backend has auth endpoints)
 export const authApi = {
-  login: (username: string, password: string) => {
+  login: (_username: string, _password: string) => {
     // For now, we'll use localStorage for auth
     // You can implement backend auth later
     return Promise.resolve({

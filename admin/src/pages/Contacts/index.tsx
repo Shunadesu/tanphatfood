@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
-import { HiPlus, HiPencil, HiTrash, HiSearch, HiPhone, HiMail } from 'react-icons/hi'
+import { Link } from 'react-router-dom'
+import { HiPlus, HiPencil, HiTrash, HiSearch } from 'react-icons/hi'
 import { contactsApi } from '../../services/api'
 
 interface Contact {
@@ -31,7 +31,6 @@ const typeLabels: Record<string, string> = {
 }
 
 export default function Contacts() {
-  const navigate = useNavigate()
   const [contacts, setContacts] = useState<Contact[]>([])
   const [loading, setLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState('')

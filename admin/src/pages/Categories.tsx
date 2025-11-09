@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { HiPlus, HiPencil, HiTrash } from 'react-icons/hi'
+import { HiPencil, HiTrash } from 'react-icons/hi'
 import { categoriesApi } from '../services/api'
 
 interface Category {
@@ -23,7 +23,14 @@ export default function Categories() {
       setLoading(true)
       const response = await categoriesApi.getAll()
       if (response.success) {
-        setCategories(response.data?.data || response.data || [])
+        const responseData = response.data as any
+        if (Array.isArray(responseData)) {
+          setCategories(responseData)
+        } else if (responseData?.data && Array.isArray(responseData.data)) {
+          setCategories(responseData.data)
+        } else {
+          setCategories([])
+        }
       }
     } catch (error) {
       console.error('Error fetching categories:', error)

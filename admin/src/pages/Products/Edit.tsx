@@ -80,7 +80,14 @@ export default function ProductEdit() {
     try {
       const response = await categoriesApi.getAll()
       if (response.success) {
-        setCategories(response.data?.data || response.data || [])
+        const responseData = response.data as any
+        if (Array.isArray(responseData)) {
+          setCategories(responseData)
+        } else if (responseData?.data && Array.isArray(responseData.data)) {
+          setCategories(responseData.data)
+        } else {
+          setCategories([])
+        }
       }
     } catch (error) {
       console.error('Error fetching categories:', error)
@@ -94,7 +101,7 @@ export default function ProductEdit() {
       setLoadingProduct(true)
       const response = await productsApi.getById(id)
       if (response.success && response.data) {
-        const product = response.data
+        const product = response.data as any
         
         // Handle category - can be string (category name) or ObjectId
         // Backend returns category name as string, but we need to find the category ID

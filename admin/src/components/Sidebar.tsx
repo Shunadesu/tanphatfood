@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom'
-import { HiHome, HiCube, HiFolder, HiNewspaper, HiMail, HiPhotograph, HiPhone, HiChevronLeft, HiChevronRight } from 'react-icons/hi'
+import { HiHome, HiCube, HiNewspaper, HiMail, HiPhotograph, HiPhone, HiChevronLeft, HiChevronRight } from 'react-icons/hi'
 
 interface SidebarProps {
   isOpen: boolean

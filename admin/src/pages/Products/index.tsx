@@ -47,18 +47,19 @@ export default function Products() {
         let totalPagesData = 1
         
         // Handle different response structures
-        if (Array.isArray(response.data)) {
+        const responseData = response.data as any
+        if (Array.isArray(responseData)) {
           // Direct array
-          productsData = response.data
-        } else if (response.data && Array.isArray(response.data.data)) {
+          productsData = responseData
+        } else if (responseData && Array.isArray(responseData.data)) {
           // Nested structure: { data: { data: [...] } }
-          productsData = response.data.data
-          totalPagesData = response.data.pages || response.pages || 1
+          productsData = responseData.data
+          totalPagesData = responseData.pages || (response as any).pages || 1
         } else {
           productsData = []
         }
         
-        totalPagesData = response.pages || response.data?.pages || 1
+        totalPagesData = (response as any).pages || responseData?.pages || 1
         
         console.log('Setting products:', productsData.length, 'items')
         setProducts(productsData)
