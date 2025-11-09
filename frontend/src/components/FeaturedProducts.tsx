@@ -14,7 +14,7 @@ const FeaturedProducts = () => {
       description:
         'Tấn Phát Food liên kết trực tiếp với các vùng nguyên liệu đạt chuẩn GlobalG.A.P, đảm bảo trái cây luôn được thu hoạch đúng độ chín, sơ chế và bảo quản theo quy trình khép kín. Chúng tôi cung cấp đa dạng các loại trái cây tươi như sầu riêng Ri6, bưởi da xanh, chuối già Nam Mỹ, xoài cát Hòa Lộc,… phục vụ cho thị trường xuất khẩu sang Trung Quốc, Hàn Quốc, Nhật Bản và châu Âu.',
       imagePosition: 'left',
-      imageUrl: '/images/fresh-fruit.png',
+      imageUrl: '/images/fresh-fruit.jpg',
       link: '/products/fresh',
     },
     {

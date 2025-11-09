@@ -21,7 +21,7 @@ const VideoSection = () => {
                 <>
                   {/* Thumbnail với Play Button */}
                   <img 
-                    src="/images/bg-video.png" 
+                    src="/images/bg-video.jpg" 
                     alt="Video về Tấn Phát Food" 
                     className="w-full h-full object-cover"
                   />
