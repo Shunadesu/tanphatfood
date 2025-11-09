@@ -19,13 +19,11 @@ import { HiChevronRight } from 'react-icons/hi'
 
 export default function AboutPage() {
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-white flex flex-col gap-8">
       <Header />
       <main>
         {/* Hero Section */}
         <AboutHeroSection />
-      
-
         {/* Standards Section */}
         {/* <StandardsSection /> */}
 

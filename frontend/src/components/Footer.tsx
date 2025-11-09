@@ -49,7 +49,7 @@ const Footer = () => {
                 <ul className="space-y-3">
                     <li>
                     <Link
-                        href="/about"
+                        href="/gioi-thieu"
                         className="text-white hover:text-[#00CB5C] transition-colors duration-300 text-sm"
                     >
                         Giới thiệu
@@ -97,7 +97,7 @@ const Footer = () => {
               <ul className="space-y-3">
                 <li>
                   <Link
-                    href="/products/fresh-fruit"
+                    href="/san-pham/trai-cay-tuoi"
                     className="text-white hover:text-[#00CB5C] transition-colors duration-300 text-sm"
                   >
                     Trái cây tươi xuất khẩu
@@ -105,7 +105,7 @@ const Footer = () => {
                 </li>
                 <li>
                   <Link
-                    href="/products/dried-frozen"
+                    href="/san-pham/trai-cay-say"
                     className="text-white hover:text-[#00CB5C] transition-colors duration-300 text-sm"
                   >
                     Trái cây sấy & đông lạnh
@@ -113,7 +113,7 @@ const Footer = () => {
                 </li>
                 <li>
                   <Link
-                    href="/products/fruit-powder"
+                    href="/san-pham/bot-trai-cay"
                     className="text-white hover:text-[#00CB5C] transition-colors duration-300 text-sm"
                   >
                     Bột trái cây tự nhiên
@@ -121,7 +121,7 @@ const Footer = () => {
                 </li>
                 <li>
                   <Link
-                    href="/products/spices"
+                    href="/san-pham/gia-vi"
                     className="text-white hover:text-[#00CB5C] transition-colors duration-300 text-sm"
                   >
                     Gia vị – Nông sản khô
@@ -160,7 +160,7 @@ const Footer = () => {
                 </li>
                 <li>
                   <Link
-                    href="/contact"
+                    href="/lien-he"
                     className="text-white hover:text-[#00CB5C] transition-colors duration-300 text-sm"
                   >
                     Liên hệ
@@ -199,11 +199,11 @@ const Footer = () => {
         <div className="mb-10">
           <div className="w-full h-96 md:h-[500px] lg:h-[600px] rounded-lg overflow-hidden shadow-xl border-2 border-white/20">
             <iframe
-              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3919.4990700000003!2d106.69999999999999!3d10.775555555555556!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMTAuNzc1NTU1NTU1NTU1NTU2LDEwNi42OTk5OTk5OTk5OTk5OTk!5e0!3m2!1sen!2sus!4v1678901234567!5m2!1sen!2sus"
+              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3917.4126906788006!2d107.25064501168553!3d10.932165989181353!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3174f8d2cac08ddf%3A0x1d4ca85b4b36cee!2zMjMgTmd1eeG7hW4gVGjhu4sgTWluaCBLaGFpLCBYdcOibiBBbiwgTG9uZyBLaMOhbmgsIMSQ4buTbmcgTmFpLCBWaeG7h3QgTmFt!5e0!3m2!1svi!2s!4v1762671257166!5m2!1svi!2s"
               width="100%"
               height="100%"
               style={{ border: 0 }}
-              allowFullScreen={false}
+              allowFullScreen={true}
               loading="lazy"
               referrerPolicy="no-referrer-when-downgrade"
               title="Vị trí Tấn Phát Food - Đồng Nai, Việt Nam"

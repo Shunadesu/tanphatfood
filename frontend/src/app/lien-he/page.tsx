@@ -11,7 +11,7 @@ import { LiaTelegramPlane } from 'react-icons/lia'
 
 export default function ContactPage() {
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-white flex flex-col gap-8">
       <Header />
       <main>
         {/* Hero Section */}

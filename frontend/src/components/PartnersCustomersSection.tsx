@@ -24,21 +24,23 @@ const PartnersCustomersSection = () => {
   ]
 
   return (
-    <section className="relative py-16 md:py-20 bg-white">
-      <div className="container mx-auto px-4 max-w-7xl">
+    <section className="relative bg-white">
+      <div className="container mx-auto px-4 md:px-6 lg:px-8 max-w-7xl ">
         {/* Header */}
         <div className="text-center mb-10 md:mb-12">
-          <h2 className="title !mb-4">
-            Đối tác & Khách hàng
-          </h2>
-          <p className="text-base md:text-lg text-gray-700 max-w-4xl mx-auto">
+          <div className="mb-4 px-2">
+            <h2 className="title !mb-0 inline-block">
+              Đối tác & Khách hàng
+            </h2>
+          </div>
+          <p className="text-base md:text-lg text-gray-700 max-w-4xl mx-auto px-2 md:px-4">
             Xuất khẩu sang nhiều thị trường nước ngoài như Nhật Bản, Hàn Quốc, Thái Lan, Trung Quốc, EU ...
           </p>
         </div>
       </div>
 
       {/* Swiper Carousel - Full Width */}
-      <div className="relative w-full -mx-4 md:-mx-6 lg:-mx-8">
+      <div className="relative w-full px-4">
         <Swiper
           modules={[Autoplay, Navigation, Pagination]}
           spaceBetween={20}

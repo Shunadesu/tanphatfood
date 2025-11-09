@@ -2,7 +2,7 @@
 
 const ProcessSection = () => {
   return (
-    <section className="relative py-16 md:py-20 bg-white">
+    <section className="relative bg-white">
       <div className="container mx-auto">
         {/* Title and Subtitle */}
         <div className="text-center mb-10 md:mb-12 lg:mb-16">

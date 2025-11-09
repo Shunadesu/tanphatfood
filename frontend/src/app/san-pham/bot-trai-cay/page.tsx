@@ -98,7 +98,7 @@ export default function PowderFruitsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-white flex flex-col gap-8">
       <Header />
       <main>
         {/* Hero Section with Breadcrumb */}

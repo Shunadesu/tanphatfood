@@ -3,7 +3,7 @@
 import { useState, useEffect, useMemo } from 'react'
 import Link from 'next/link'
 import { LiaTelegramPlane } from "react-icons/lia";
-import { productsApi } from '@/services/api'
+import { useHeaderStore } from '@/store/headerStore'
 
 interface DropdownItem {
   name: string
@@ -19,28 +19,14 @@ interface MenuItem {
   productType?: 'fresh' | 'dried' | 'powder'
 }
 
-interface Product {
-  id: string
-  title: string
-  slug: string
-  type: 'fresh' | 'dried' | 'powder'
-}
-
 const Header = () => {
   const [isScrolled, setIsScrolled] = useState(false)
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [isDropdownOpen, setIsDropdownOpen] = useState<string | null>(null)
   const [mobileDropdownOpen, setMobileDropdownOpen] = useState<string | null>(null)
-  const [products, setProducts] = useState<{
-    fresh: Product[]
-    dried: Product[]
-    powder: Product[]
-  }>({
-    fresh: [],
-    dried: [],
-    powder: [],
-  })
-  const [loading, setLoading] = useState(true)
+  
+  // Sử dụng Zustand store
+  const { products, loading, fetchProducts, initializeFromStorage } = useHeaderStore()
 
   useEffect(() => {
     const handleScroll = () => {
@@ -51,89 +37,56 @@ const Header = () => {
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
 
-  // Fetch products for dropdown menus
+  // Khởi tạo từ localStorage và fetch products nếu cần
   useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        setLoading(true)
-        
-        // Fetch products for each type
-        const [freshRes, driedRes, powderRes] = await Promise.all([
-          productsApi.getAll({ type: 'fresh', isActive: true, limit: 10 }),
-          productsApi.getAll({ type: 'dried', isActive: true, limit: 10 }),
-          productsApi.getAll({ type: 'powder', isActive: true, limit: 10 }),
-        ])
-
-        if (freshRes.success) {
-          const freshData = Array.isArray(freshRes.data) 
-            ? freshRes.data 
-            : (freshRes.data as any)?.data || []
-          setProducts(prev => ({ ...prev, fresh: freshData }))
-        }
-
-        if (driedRes.success) {
-          const driedData = Array.isArray(driedRes.data) 
-            ? driedRes.data 
-            : (driedRes.data as any)?.data || []
-          setProducts(prev => ({ ...prev, dried: driedData }))
-        }
-
-        if (powderRes.success) {
-          const powderData = Array.isArray(powderRes.data) 
-            ? powderRes.data 
-            : (powderRes.data as any)?.data || []
-          setProducts(prev => ({ ...prev, powder: powderData }))
-        }
-      } catch (error) {
-        console.error('Error fetching products for header:', error)
-      } finally {
-        setLoading(false)
-      }
-    }
-
+    // Khởi tạo từ localStorage trước
+    initializeFromStorage()
+    
+    // Sau đó fetch nếu cần (store sẽ tự kiểm tra cache)
     fetchProducts()
-  }, [])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []) // Chỉ chạy một lần khi mount
 
   // Build menu items with dynamic dropdown items from API
   const menuItems: MenuItem[] = useMemo(() => [
     { name: 'Trang chủ', href: '/' },
-    { name: 'Giới thiệu', href: '/about' },
+    { name: 'Giới thiệu', href: '/gioi-thieu' },
     {
       name: 'Trái cây tươi',
-      href: '/products/fresh',
+      href: '/san-pham/trai-cay-tuoi',
       hasDropdown: true,
       productType: 'fresh',
       dropdownItems: products.fresh.map((product) => ({
         name: product.title,
-        href: `/products/${product.slug}`,
+        href: `/san-pham/${product.slug}`,
       })),
     },
     {
       name: 'Trái cây sấy',
-      href: '/products/dried',
+      href: '/san-pham/trai-cay-say',
       hasDropdown: true,
       productType: 'dried',
       dropdownItems: products.dried.map((product) => ({
         name: product.title,
-        href: `/products/${product.slug}`,
+        href: `/san-pham/${product.slug}`,
       })),
     },
     {
       name: 'Bột trái cây',
-      href: '/products/powder',
+      href: '/san-pham/bot-trai-cay',
       hasDropdown: true,
       productType: 'powder',
       dropdownItems: products.powder.map((product) => ({
         name: product.title,
-        href: `/products/${product.slug}`,
+        href: `/san-pham/${product.slug}`,
       })),
     },
     {
       name: 'Cẩm nang',
-      href: '/handbook',
+      href: '/cam-nang',
       hasDropdown: false,
     },
-    { name: 'Liên hệ', href: '/contact' },
+    { name: 'Liên hệ', href: '/lien-he' },
   ], [products])
 
   return (
@@ -245,7 +198,7 @@ const Header = () => {
             </nav>
             
             <div className="flex items-center gap-4">
-              <Link href="/contact" className='hidden button-primary lg:flex items-center gap-2'>
+              <Link href="/lien-he" className='hidden button-primary lg:flex items-center gap-2'>
                 <span>Liên hệ báo giá</span>
                 <LiaTelegramPlane className='w-5 h-5' />
               </Link>
@@ -362,7 +315,7 @@ const Header = () => {
                 ))}
                 <div className="px-6 pt-4 pb-2 border-t border-gray-200 mt-2 flex justify-center">
                   <Link
-                    href="/contact"
+                    href="/lien-he"
                     className="button-primary w-full flex items-center justify-center"
                     onClick={() => setIsMenuOpen(false)}
                   >

@@ -63,14 +63,14 @@ const ProductsHeroSection = () => {
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <Link
-              href="/about"
+              href="/gioi-thieu"
               className="button-primary inline-flex items-center gap-2"
             >
               <span>Tìm hiểu về chúng tôi</span>
               <LiaTelegramPlane className="w-5 h-5" />
             </Link>
             <Link
-              href="/contact"
+              href="/lien-he"
               className="button-secondary"
             >
               Liên hệ báo giá

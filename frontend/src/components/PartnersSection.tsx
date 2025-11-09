@@ -25,7 +25,7 @@ const PartnersSection = () => {
   ]
 
   return (
-    <section className="relative py-8 md:py-12">
+    <section className="relative">
       <div className="container mx-auto px-4 max-w-7xl">
         {/* Main Card - Contains Map and Statistics */}
         <div className="bg-white rounded-[30px] shadow-sm overflow-hidden">

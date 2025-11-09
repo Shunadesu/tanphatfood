@@ -26,25 +26,25 @@ Tấn Phát Food cam kết phát triển bền vững, hỗ trợ nông dân đ�
   const shortContent = `Tấn Phát Food mang đến những sản phẩm nông sản Việt Nam chất lượng cao đến với thị trường quốc tế. Chúng tôi cam kết đảm bảo chất lượng từ khâu nguyên liệu đến khi xuất khẩu, với quy trình kiểm soát nghiêm ngặt.`
 
   return (
-    <section className="relative min-h-screen md:min-h-[800px] lg:min-h-[900px]">
-      {/* Background Image */}
-      <div className="absolute inset-0 z-0">
+    <section className="relative w-full">
+      {/* Background Image - Fixed height */}
+      <div className="relative w-full h-[60vh] md:h-[70vh] lg:h-[75vh]">
         <div 
-          className="w-full h-full bg-cover bg-center bg-no-repeat"
+          className="absolute inset-0 w-full h-full bg-cover bg-center bg-no-repeat"
           style={{
             backgroundImage: 'url(/images/bg-ketnoi.jpg)',
           }}
         />
-        {/* Overlay để làm nổi bật white box */}
+        {/* Overlay */}
         <div className="absolute inset-0 bg-black/10" />
       </div>
 
-      {/* White Content Box - Fixed at bottom */}
-      <div className="absolute bottom-0 left-0 right-0 z-10">
-        <div className="container mx-auto px-4 max-w-7xl">
+      {/* White Content Box - Một phần nằm trong background, mở rộng xuống khi expand */}
+      <div className="relative w-full -mt-[200px] md:-mt-[250px] lg:-mt-[300px]">
+        <div className="container mx-auto px-4 md:px-6 lg:px-8 max-w-7xl">
           <div className="bg-white rounded-t-[30px] p-8 md:p-10 lg:p-12">
             {/* Title */}
-            <h2 className="title">
+            <h2 className="title mb-6 md:mb-8">
               Tấn Phát Food – Kết nối nông sản Việt với thị trường toàn cầu
             </h2>
 
@@ -86,6 +86,9 @@ Tấn Phát Food cam kết phát triển bền vững, hỗ trợ nông dân đ�
           </div>
         </div>
       </div>
+
+      {/* Bottom spacing */}
+      {/* <div className="w-full bg-white pb-12 md:pb-16 lg:pb-20" /> */}
     </section>
   )
 }

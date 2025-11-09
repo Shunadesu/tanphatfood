@@ -2,7 +2,7 @@
 
 const CertificationsSection = () => {
   return (
-    <section className="relative py-8 md:py-12 container mx-auto">
+    <section className="relative container mx-auto">
         {/* Certification Image Card */}
           <div className="bg-white rounded-[30px]">
             <div className="relative w-full rounded-2xl overflow-hidden">

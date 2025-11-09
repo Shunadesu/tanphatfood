@@ -14,7 +14,7 @@ interface ProductCardProps {
 
 const ProductCard = ({ id, title, description, image, slug, category = 'fresh' }: ProductCardProps) => {
       // All products now use the unified route
-      const href = `/products/${slug}`
+      const href = `/san-pham/${slug}`
   
   return (
     <Link href={href} className="group">

@@ -1,19 +1,19 @@
 'use client'
 
 import { useParams, useRouter } from 'next/navigation'
-import { getHandbookBySlug } from '@/data/mockHandbook'
+import { getNewsBySlug } from '@/data/mockNews'
 import { HiArrowLeft, HiCalendar, HiUser } from 'react-icons/hi'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
 import FloatingContactButtons from '@/components/FloatingContactButtons'
 import ScrollToTop from '@/components/ScrollToTop'
 
-export default function HandbookDetailPage() {
+export default function NewsDetailPage() {
   const params = useParams()
   const router = useRouter()
   const slug = params?.slug as string
 
-  const article = getHandbookBySlug(slug)
+  const article = getNewsBySlug(slug)
 
   if (!article) {
     return (
@@ -21,10 +21,10 @@ export default function HandbookDetailPage() {
         <div className="text-center">
           <h1 className="text-2xl font-bold text-gray-900 mb-4">Bài viết không tồn tại</h1>
           <button
-            onClick={() => router.push('/cam-nang')}
+            onClick={() => router.push('/')}
             className="button-primary"
           >
-            Về trang cẩm nang
+            Về trang chủ
           </button>
         </div>
       </div>
@@ -35,6 +35,8 @@ export default function HandbookDetailPage() {
     <div className="min-h-screen bg-white">
       <Header />
       <main>
+
+
         {/* Article Header */}
         <article className="py-8 md:py-12 mt-20">
           <div className="container mx-auto px-4 max-w-5xl">
@@ -100,7 +102,7 @@ export default function HandbookDetailPage() {
                 className="button-primary-outline inline-flex items-center gap-2"
               >
                 <HiArrowLeft className="w-5 h-5" />
-                <span>Quay lại danh sách cẩm nang</span>
+                <span>Quay lại danh sách tin tức</span>
               </button>
             </div>
           </div>

@@ -22,7 +22,7 @@ const AboutSection = () => {
             <div className="flex flex-col sm:flex-row items-start gap-4 pt-4">
               {/* Button 1: Tìm hiểu thêm - Green */}
               <Link
-                href="/about"
+                href="/gioi-thieu"
                 className="button-primary flex items-center gap-2"
               >
                 <span>Tìm hiểu thêm</span>
@@ -31,7 +31,7 @@ const AboutSection = () => {
 
               {/* Button 2: Liên hệ báo giá - White with green border */}
               <Link
-                href="/contact"
+                href="/lien-he"
                 className="button-secondary"
               >
                 Liên hệ báo giá!

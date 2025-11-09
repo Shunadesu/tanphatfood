@@ -83,7 +83,7 @@ const NewsSection = () => {
   }
 
   return (
-    <section className="relative py-16 md:py-20 bg-white">
+    <section className="relative bg-white">
       <div className="container mx-auto px-4 max-w-7xl">
         {/* Header */}
         <div className="text-center mb-10 md:mb-12 lg:mb-16">
@@ -143,7 +143,7 @@ const NewsSection = () => {
                   <div className="flex items-center justify-between gap-4 mt-auto pt-2">
                     {/* CTA Button */}
                     <Link
-                      href={`/news/${item.slug}`}
+                      href={`/tin-tuc/${item.slug}`}
                       className="button-primary-outline whitespace-nowrap flex-shrink-0 text-sm"
                     >
                       Xem chi tiết
@@ -168,7 +168,7 @@ const NewsSection = () => {
         {/* View More Button */}
         <div className="text-center">
           <Link
-            href="/news"
+            href="/tin-tuc"
             className="button-primary inline-flex items-center gap-2"
           >
             <span>Xem thêm tin tức</span>

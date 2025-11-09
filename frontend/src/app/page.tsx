@@ -23,7 +23,7 @@ import QuoteSection from '@/components/QuoteSection'
 
 export default function Home() {
   return (
-    <main className="min-h-screen">
+    <main className="min-h-screen flex flex-col gap-8">
       <Header />
       <HeroSection />
       <FeaturedProducts />

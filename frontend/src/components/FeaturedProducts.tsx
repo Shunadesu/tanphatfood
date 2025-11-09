@@ -40,7 +40,7 @@ const FeaturedProducts = () => {
   ]
 
   return (
-    <section className="py-12 md:py-16 lg:py-20 bg-[#ECFFF3]">
+    <section className="py-12 md:py-16 lg:py-20 ">
       <div className="container mx-auto px-4 max-w-7xl">
         {/* Header Section */}
         <div className="text-center mb-12 md:mb-16 lg:mb-20">

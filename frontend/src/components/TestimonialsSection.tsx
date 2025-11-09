@@ -143,10 +143,10 @@ const TestimonialsSection = () => {
   }
 
   return (
-    <section className="relative lg:min-h-[70vh] min-h-[50vh] bg-white flex flex-col pb-8 lg:pb-16">
+    <section className="relative lg:min-h-[70vh] min-h-[60vh] bg-white flex flex-col pt-8">
       <div className="container mx-auto px-4 max-w-7xl">
         {/* Header */}
-        <div className="text-center mb-10 md:mb-12 pt-16 md:pt-20">
+        <div className="text-center mb-10 md:mb-12">
           <h2 className="title !mb-4">
             Khách hàng nói gì về chúng tôi
           </h2>

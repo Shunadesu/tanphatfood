@@ -1,19 +1,19 @@
 'use client'
 
 import { useParams, useRouter } from 'next/navigation'
-import { getNewsBySlug } from '@/data/mockNews'
+import { getHandbookBySlug } from '@/data/mockHandbook'
 import { HiArrowLeft, HiCalendar, HiUser } from 'react-icons/hi'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
 import FloatingContactButtons from '@/components/FloatingContactButtons'
 import ScrollToTop from '@/components/ScrollToTop'
 
-export default function NewsDetailPage() {
+export default function HandbookDetailPage() {
   const params = useParams()
   const router = useRouter()
   const slug = params?.slug as string
 
-  const article = getNewsBySlug(slug)
+  const article = getHandbookBySlug(slug)
 
   if (!article) {
     return (
@@ -21,10 +21,10 @@ export default function NewsDetailPage() {
         <div className="text-center">
           <h1 className="text-2xl font-bold text-gray-900 mb-4">Bài viết không tồn tại</h1>
           <button
-            onClick={() => router.push('/')}
+            onClick={() => router.push('/cam-nang')}
             className="button-primary"
           >
-            Về trang chủ
+            Về trang cẩm nang
           </button>
         </div>
       </div>
@@ -35,19 +35,6 @@ export default function NewsDetailPage() {
     <div className="min-h-screen bg-white">
       <Header />
       <main>
-        {/* Breadcrumb */}
-        {/* <div className="py-4 mt-20">
-          <div className="container mx-auto px-4 max-w-5xl">
-            <button
-              onClick={() => router.back()}
-              className="inline-flex items-center gap-2 text-gray-600 hover:text-[#00652E] transition-colors"
-            >
-              <HiArrowLeft className="w-5 h-5" />
-              <span>Quay lại</span>
-            </button>
-          </div>
-        </div> */}
-
         {/* Article Header */}
         <article className="py-8 md:py-12 mt-20">
           <div className="container mx-auto px-4 max-w-5xl">
@@ -113,7 +100,7 @@ export default function NewsDetailPage() {
                 className="button-primary-outline inline-flex items-center gap-2"
               >
                 <HiArrowLeft className="w-5 h-5" />
-                <span>Quay lại danh sách tin tức</span>
+                <span>Quay lại danh sách cẩm nang</span>
               </button>
             </div>
           </div>

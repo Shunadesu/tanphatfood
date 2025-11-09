@@ -1,62 +1,30 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import Link from 'next/link'
 import { HiPlus } from 'react-icons/hi'
 import ProductCard from '@/components/ProductCard'
-import { productsApi } from '@/services/api'
-
-interface Product {
-  id: string
-  title: string
-  description: string
-  shortDescription?: string
-  image: string
-  slug: string
-  type: 'fresh' | 'dried' | 'powder'
-}
+import { useProductsStore } from '@/store/productsStore'
 
 const PowderedFruitsSection = () => {
-  const [products, setProducts] = useState<Product[]>([])
-  const [loading, setLoading] = useState(true)
+  const products = useProductsStore((state) => state.productsByType.powder)
+  const loading = useProductsStore((state) => state.loading)
+  const fetchProductsByType = useProductsStore((state) => state.fetchProductsByType)
+  const initializeFromStorage = useProductsStore((state) => state.initializeFromStorage)
 
   useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        setLoading(true)
-        const response = await productsApi.getAll({
-          type: 'powder',
-          isActive: true,
-          limit: 6,
-        })
-
-        if (response.success) {
-          // Backend returns: { success: true, data: [...], count, total, page, pages }
-          let productsData: Product[] = []
-          
-          if (Array.isArray(response.data)) {
-            productsData = response.data
-          } else if (response.data && typeof response.data === 'object' && 'data' in response.data) {
-            // Nested structure
-            productsData = Array.isArray((response.data as any).data) 
-              ? (response.data as any).data 
-              : []
-          }
-          
-          setProducts(productsData)
-        }
-      } catch (error) {
-        console.error('Error fetching powder products:', error)
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    fetchProducts()
-  }, [])
+    // Initialize from storage first
+    initializeFromStorage()
+    
+    // Fetch products if not already loaded
+    fetchProductsByType('powder', { limit: 6 })
+  }, [fetchProductsByType, initializeFromStorage])
+  
+  // Get only first 6 products for display
+  const displayProducts = products.slice(0, 6)
 
   return (
-    <section className="py-16 md:py-20 bg-gradient-to-br from-white via-[#E6F7ED]/30 to-white">
+    <section className="py-8 md:py-12 bg-gradient-to-br from-white via-[#E6F7ED]/30 to-white">
       <div className="container mx-auto px-4 max-w-7xl">
         {/* Header Section */}
         <div className="text-center mb-12 md:mb-16">
@@ -69,15 +37,15 @@ const PowderedFruitsSection = () => {
         </div>
 
         {/* Products Grid */}
-        {loading ? (
+        {loading && displayProducts.length === 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 mb-12">
             {[...Array(6)].map((_, index) => (
               <div key={index} className="bg-gray-200 animate-pulse rounded-2xl h-80" />
             ))}
           </div>
-        ) : products.length > 0 ? (
+        ) : displayProducts.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 mb-12">
-            {products.map((product) => (
+            {displayProducts.map((product) => (
               <ProductCard
                 key={product.id}
                 id={product.id}
@@ -98,7 +66,7 @@ const PowderedFruitsSection = () => {
         {/* CTA Button */}
         <div className="text-center">
           <Link
-            href="/products/powder"
+            href="/san-pham/bot-trai-cay"
             className="button-primary inline-flex items-center gap-2"
           >
             Khám phá sản phẩm

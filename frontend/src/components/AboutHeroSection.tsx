@@ -7,7 +7,7 @@ const AboutHeroSection = () => {
   return (
     <section className="relative bg-white min-h-[95vh] flex items-center justify-center pt-20">
       {/* Background Image */}
-      <div className="absolute inset-0 z-0 rounded-br-[70px] rounded-bl-[70px] overflow-hidden">
+      <div className="absolute inset-0 z-0 rounded-none md:rounded-br-[70px] md:rounded-bl-[70px] overflow-hidden">
         <div
           className="w-full h-full bg-cover bg-center bg-no-repeat"
           style={{ backgroundImage: 'url(/images/hero/hero_images.png)' }}
@@ -63,14 +63,14 @@ const AboutHeroSection = () => {
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <Link
-              href="/products"
+              href="/san-pham"
               className="button-primary inline-flex items-center gap-2"
             >
               <span>Xem sản phẩm</span>
               <LiaTelegramPlane className="w-5 h-5" />
             </Link>
             <Link
-              href="/contact"
+              href="/lien-he"
               className="button-secondary"
             >
               Liên hệ với chúng tôi
