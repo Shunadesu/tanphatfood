@@ -5,10 +5,11 @@ const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:5000/api'
 // GET /api/contacts/[id] - Get contact by ID
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const url = `${BACKEND_URL}/contacts/${params.id}`
+    const { id } = await params
+    const url = `${BACKEND_URL}/contacts/${id}`
 
     const response = await fetch(url, {
       method: 'GET',
@@ -35,11 +36,12 @@ export async function GET(
 // PUT /api/contacts/[id] - Update contact
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     const body = await request.json()
-    const response = await fetch(`${BACKEND_URL}/contacts/${params.id}`, {
+    const response = await fetch(`${BACKEND_URL}/contacts/${id}`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
@@ -64,10 +66,11 @@ export async function PUT(
 // DELETE /api/contacts/[id] - Delete contact
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const response = await fetch(`${BACKEND_URL}/contacts/${params.id}`, {
+    const { id } = await params
+    const response = await fetch(`${BACKEND_URL}/contacts/${id}`, {
       method: 'DELETE',
       headers: {
         'Content-Type': 'application/json',

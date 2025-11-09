@@ -5,10 +5,11 @@ const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:5000/api'
 // GET /api/products/slug/[slug] - Get product by slug
 export async function GET(
   request: NextRequest,
-  { params }: { params: { slug: string } }
+  { params }: { params: Promise<{ slug: string }> }
 ) {
   try {
-    const url = `${BACKEND_URL}/products/slug/${params.slug}`
+    const { slug } = await params
+    const url = `${BACKEND_URL}/products/slug/${slug}`
 
     const response = await fetch(url, {
       method: 'GET',

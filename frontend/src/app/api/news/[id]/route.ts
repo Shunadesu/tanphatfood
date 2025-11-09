@@ -5,12 +5,13 @@ const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:5000/api'
 // GET /api/news/[id] - Get news by ID
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     const searchParams = request.nextUrl.searchParams
     const queryString = searchParams.toString()
-    const url = `${BACKEND_URL}/news/${params.id}${queryString ? `?${queryString}` : ''}`
+    const url = `${BACKEND_URL}/news/${id}${queryString ? `?${queryString}` : ''}`
 
     const response = await fetch(url, {
       method: 'GET',
@@ -37,11 +38,12 @@ export async function GET(
 // PUT /api/news/[id] - Update news
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     const body = await request.json()
-    const response = await fetch(`${BACKEND_URL}/news/${params.id}`, {
+    const response = await fetch(`${BACKEND_URL}/news/${id}`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
@@ -66,10 +68,11 @@ export async function PUT(
 // DELETE /api/news/[id] - Delete news
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const response = await fetch(`${BACKEND_URL}/news/${params.id}`, {
+    const { id } = await params
+    const response = await fetch(`${BACKEND_URL}/news/${id}`, {
       method: 'DELETE',
       headers: {
         'Content-Type': 'application/json',

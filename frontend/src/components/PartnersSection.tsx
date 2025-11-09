@@ -64,9 +64,9 @@ const PartnersSection = () => {
                     </div>
                   </div>
                   
-                  <h4 className="text-sm md:text-base font-semibold text-gray-800 mb-2">
+                  <p className="text-sm md:text-base font-semibold text-gray-800 mb-2">
                     {stat.label}
-                  </h4>
+                  </p>
                   
                   <p className="text-xs md:text-sm text-gray-500">
                     {stat.description}

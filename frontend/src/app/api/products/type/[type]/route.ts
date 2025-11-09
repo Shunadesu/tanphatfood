@@ -5,12 +5,13 @@ const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:5000/api'
 // GET /api/products/type/[type] - Get products by type
 export async function GET(
   request: NextRequest,
-  { params }: { params: { type: string } }
+  { params }: { params: Promise<{ type: string }> }
 ) {
   try {
+    const { type } = await params
     const searchParams = request.nextUrl.searchParams
     const queryString = searchParams.toString()
-    const url = `${BACKEND_URL}/products/type/${params.type}${queryString ? `?${queryString}` : ''}`
+    const url = `${BACKEND_URL}/products/type/${type}${queryString ? `?${queryString}` : ''}`
 
     const response = await fetch(url, {
       method: 'GET',

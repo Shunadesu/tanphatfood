@@ -175,9 +175,9 @@ const QuoteSection = () => {
             <div className="bg-white rounded-2xl shadow-2xl relative" style={{ overflow: 'visible' }}>
               {/* Form Header */}
               <div className="bg-[#00652E] rounded-t-2xl px-6 py-4 relative z-10">
-                <h3 className="text-white font-bold text-lg md:text-xl text-center">
+                <h2 className="text-white font-bold text-lg md:text-xl text-center">
                   Điền thông tin nhận báo giá từ Tấn Phát Food !
-                </h3>
+                </h2>
               </div>
 
               {/* Form Content */}

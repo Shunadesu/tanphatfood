@@ -5,12 +5,13 @@ const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:5000/api'
 // GET /api/news/slug/[slug] - Get news by slug
 export async function GET(
   request: NextRequest,
-  { params }: { params: { slug: string } }
+  { params }: { params: Promise<{ slug: string }> }
 ) {
   try {
+    const { slug } = await params
     const searchParams = request.nextUrl.searchParams
     const queryString = searchParams.toString()
-    const url = `${BACKEND_URL}/news/slug/${params.slug}${queryString ? `?${queryString}` : ''}`
+    const url = `${BACKEND_URL}/news/slug/${slug}${queryString ? `?${queryString}` : ''}`
 
     const response = await fetch(url, {
       method: 'GET',

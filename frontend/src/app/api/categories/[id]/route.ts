@@ -5,10 +5,11 @@ const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:5000/api'
 // GET /api/categories/[id] - Get category by ID
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const url = `${BACKEND_URL}/categories/${params.id}`
+    const { id } = await params
+    const url = `${BACKEND_URL}/categories/${id}`
 
     const response = await fetch(url, {
       method: 'GET',
@@ -35,11 +36,12 @@ export async function GET(
 // PUT /api/categories/[id] - Update category
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     const body = await request.json()
-    const url = `${BACKEND_URL}/categories/${params.id}`
+    const url = `${BACKEND_URL}/categories/${id}`
 
     const response = await fetch(url, {
       method: 'PUT',
@@ -66,10 +68,11 @@ export async function PUT(
 // DELETE /api/categories/[id] - Delete category
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const url = `${BACKEND_URL}/categories/${params.id}`
+    const { id } = await params
+    const url = `${BACKEND_URL}/categories/${id}`
 
     const response = await fetch(url, {
       method: 'DELETE',

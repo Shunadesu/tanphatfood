@@ -201,9 +201,9 @@ const TestimonialsSection = () => {
                     name={testimonial.name}
                   />
                   <div>
-                    <h4 className="font-bold text-gray-900 text-sm md:text-base mb-1">
+                    <p className="font-bold text-gray-900 text-sm md:text-base mb-1">
                       {testimonial.name}
-                    </h4>
+                    </p>
                     <p className="text-gray-500 text-xs md:text-sm">
                       {testimonial.role}
                     </p>

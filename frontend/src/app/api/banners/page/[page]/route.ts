@@ -5,10 +5,11 @@ const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:5000/api'
 // GET /api/banners/page/[page] - Get banner by page
 export async function GET(
   request: NextRequest,
-  { params }: { params: { page: string } }
+  { params }: { params: Promise<{ page: string }> }
 ) {
   try {
-    const url = `${BACKEND_URL}/banners/page/${params.page}`
+    const { page } = await params
+    const url = `${BACKEND_URL}/banners/page/${page}`
 
     const response = await fetch(url, {
       method: 'GET',

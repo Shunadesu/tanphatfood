@@ -86,7 +86,6 @@ export default function ProductDetailPage() {
             id: productData.id || '',
             title: productData.title || '',
             description: productData.description || '',
-            shortDescription: productData.shortDescription || '',
             image: productData.image || '',
             slug: productData.slug || slug,
             type: productData.type || 'fresh',
@@ -439,11 +438,11 @@ export default function ProductDetailPage() {
         {/* PART 2: Detailed Product Information Section (Bottom) */}
         <section className="py-8 md:py-12 bg-white">
           <div className="container mx-auto px-4 max-w-7xl">
-            {/* Main Title */}
+            {/* Main Title - Removed duplicate title, using h2 for section heading */}
             <div className="mb-8 md:mb-12">
-              <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-[#00652E] mb-4">
-                {product.title} {getTitleSuffix()}
-              </h1>
+              <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-[#00652E] mb-4">
+                Thông tin chi tiết sản phẩm
+              </h2>
               {product.companyIntro && (
                 <p className="text-base md:text-lg text-gray-700 leading-relaxed max-w-4xl">
                   {product.companyIntro}
@@ -597,9 +596,9 @@ export default function ProductDetailPage() {
                   {/* Header with Icon */}
                   <div className="flex items-center gap-3 mb-6">
                     <HiDocumentText className="w-6 h-6 text-[#00652E] flex-shrink-0" />
-                    <h2 className="text-xl md:text-2xl font-bold text-[#00652E]">
+                    <h3 className="text-xl md:text-2xl font-bold text-[#00652E]">
                       Thông tin chi tiết
-                    </h2>
+                    </h3>
                   </div>
                   
                   {/* Table Format */}

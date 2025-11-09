@@ -5,10 +5,11 @@ const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:5000/api'
 // PATCH /api/quotes/[id]/read - Mark quote as read
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const url = `${BACKEND_URL}/quotes/${params.id}/read`
+    const { id } = await params
+    const url = `${BACKEND_URL}/quotes/${id}/read`
 
     const response = await fetch(url, {
       method: 'PATCH',

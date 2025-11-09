@@ -5,10 +5,11 @@ const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:5000/api'
 // GET /api/products/[id] - Get product by ID
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const url = `${BACKEND_URL}/products/${params.id}`
+    const { id } = await params
+    const url = `${BACKEND_URL}/products/${id}`
 
     const response = await fetch(url, {
       method: 'GET',
@@ -35,11 +36,12 @@ export async function GET(
 // PUT /api/products/[id] - Update product
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     const body = await request.json()
-    const url = `${BACKEND_URL}/products/${params.id}`
+    const url = `${BACKEND_URL}/products/${id}`
 
     const response = await fetch(url, {
       method: 'PUT',
@@ -66,10 +68,11 @@ export async function PUT(
 // DELETE /api/products/[id] - Delete product
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const url = `${BACKEND_URL}/products/${params.id}`
+    const { id } = await params
+    const url = `${BACKEND_URL}/products/${id}`
 
     const response = await fetch(url, {
       method: 'DELETE',

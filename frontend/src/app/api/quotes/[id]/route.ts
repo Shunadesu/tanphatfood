@@ -5,10 +5,11 @@ const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:5000/api'
 // GET /api/quotes/[id] - Get quote by ID
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const url = `${BACKEND_URL}/quotes/${params.id}`
+    const { id } = await params
+    const url = `${BACKEND_URL}/quotes/${id}`
 
     const response = await fetch(url, {
       method: 'GET',
@@ -35,11 +36,12 @@ export async function GET(
 // PUT /api/quotes/[id] - Update quote
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     const body = await request.json()
-    const response = await fetch(`${BACKEND_URL}/quotes/${params.id}`, {
+    const response = await fetch(`${BACKEND_URL}/quotes/${id}`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
@@ -64,10 +66,11 @@ export async function PUT(
 // DELETE /api/quotes/[id] - Delete quote
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const response = await fetch(`${BACKEND_URL}/quotes/${params.id}`, {
+    const { id } = await params
+    const response = await fetch(`${BACKEND_URL}/quotes/${id}`, {
       method: 'DELETE',
       headers: {
         'Content-Type': 'application/json',

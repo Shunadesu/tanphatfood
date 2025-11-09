@@ -156,12 +156,15 @@ const Header = () => {
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between h-24">
             {/* Logo - Mobile & Desktop */}
-            <Link href="/" className="flex items-center space-x-3 z-10">
+            <Link href="/" className="flex lg:hidden items-center space-x-3 z-10">
               <img src="/images/logo.png" alt="logo" className="w-12 h-12" />
             </Link>
 
             {/* Desktop Navigation */}
             <nav className="hidden lg:flex items-center space-x-6 bg-white rounded-lg px-4 py-2 ml-4">
+              <Link href="/" className="flex items-center space-x-3 z-10">
+              <img src="/images/logo.png" alt="logo" className="w-12 h-12" />
+            </Link>
               <div className='w-[0.5px] h-10 bg-gray-200' />
               {menuItems.map((item) => (
                 <div
