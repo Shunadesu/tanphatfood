@@ -19,6 +19,7 @@ interface Product {
   id: string
   title: string
   description: string
+  shortDescription?: string
   image: string
   slug: string
   type: string
@@ -153,7 +154,7 @@ export default function PowderFruitsPage() {
                       key={product.id}
                       id={product.id}
                       title={product.title}
-                      description={product.description}
+                      description={product.shortDescription || product.description || ''}
                       image={product.image}
                       slug={product.slug}
                       category="powder"
