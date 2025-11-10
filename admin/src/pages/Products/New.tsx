@@ -58,8 +58,6 @@ export default function ProductNew() {
 
   const [newFeature, setNewFeature] = useState('')
   const [newMarket, setNewMarket] = useState('')
-  const [newSpecKey, setNewSpecKey] = useState('')
-  const [newSpecValue, setNewSpecValue] = useState('')
   const [uploadingImage, setUploadingImage] = useState<string | null>(null)
 
   useEffect(() => {
@@ -223,30 +221,6 @@ export default function ProductNew() {
     }))
   }
 
-  const handleAddSpecification = () => {
-    if (newSpecKey.trim() && newSpecValue.trim()) {
-      setFormData(prev => ({
-        ...prev,
-        specifications: {
-          ...prev.specifications,
-          [newSpecKey.trim()]: newSpecValue.trim(),
-        },
-      }))
-      setNewSpecKey('')
-      setNewSpecValue('')
-    }
-  }
-
-  const handleRemoveSpecification = (key: string) => {
-    setFormData(prev => {
-      const newSpecs = { ...prev.specifications }
-      delete newSpecs[key]
-      return {
-        ...prev,
-        specifications: newSpecs,
-      }
-    })
-  }
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>, field: 'image' | 'qualityImage') => {
     const file = e.target.files?.[0]
