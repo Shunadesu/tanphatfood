@@ -10,9 +10,10 @@ interface ProductCardProps {
   image: string
   slug: string
   category?: 'fresh' | 'dried' | 'powder' // Thêm prop để xác định category
+  isFeatured?: boolean // Thêm prop để đánh dấu sản phẩm nổi bật
 }
 
-const ProductCard = ({ id, title, description, image, slug, category = 'fresh' }: ProductCardProps) => {
+const ProductCard = ({ id, title, description, image, slug, category = 'fresh', isFeatured = false }: ProductCardProps) => {
       // All products now use the unified route
       const href = `/san-pham/${slug}`
   
@@ -35,6 +36,12 @@ const ProductCard = ({ id, title, description, image, slug, category = 'fresh' }
           <div className="absolute top-0 left-0 bg-white rounded-br-xl px-3 py-2 shadow-md z-10">
             <Image src="/images/logo.png" alt="Logo" width={100} height={100} className="w-10 h-10" />
           </div>
+          {/* Featured Badge - Top Right */}
+          {isFeatured && (
+            <div className="absolute top-0 right-0 bg-[#00652E] text-white rounded-bl-xl px-3 py-1.5 shadow-md z-10">
+              <span className="text-xs md:text-sm font-semibold">Nổi bật</span>
+            </div>
+          )}
         </div>
 
         {/* Content Section - Bottom */}

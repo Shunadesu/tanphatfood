@@ -18,10 +18,17 @@ const ProcessSection = () => {
         <div className="mx-auto">
           <div className="bg-white rounded-[30px] shadow-lg overflow-hidden">
             <div className="relative w-full rounded-2xl overflow-hidden">
+              {/* Desktop Image */}
               <img 
                 src="/images/quytrinh.jpg" 
                 alt="Quy trình xuất nhập khẩu trái cây tại Tấn Phát Foods" 
-                className="w-full h-auto object-cover"
+                className="hidden md:block w-full h-auto object-cover"
+              />
+              {/* Mobile Image */}
+              <img 
+                src="/images/quytrinhmb.jpg" 
+                alt="Quy trình xuất nhập khẩu trái cây tại Tấn Phát Foods" 
+                className="block md:hidden w-full h-auto object-cover"
               />
             </div>
           </div>

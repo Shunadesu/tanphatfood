@@ -13,11 +13,12 @@ const PowderedFruitsSection = () => {
   const initializeFromStorage = useProductsStore((state) => state.initializeFromStorage)
 
   useEffect(() => {
-    // Initialize from storage first
+    // Initialize store and check cache version (will clear old cache if version mismatch)
     initializeFromStorage()
     
-    // Fetch products if not already loaded
-    fetchProductsByType('powder', { limit: 6 })
+    // Always fetch fresh data from API to ensure latest products
+    // Force fetch to bypass cache and get latest data
+    fetchProductsByType('powder', { limit: 6, force: true })
   }, [fetchProductsByType, initializeFromStorage])
   
   // Get only first 6 products for display
@@ -54,6 +55,7 @@ const PowderedFruitsSection = () => {
                 image={product.image || '/images/placeholder.jpg'}
                 slug={product.slug}
                 category="powder"
+                isFeatured={product.isFeatured}
               />
             ))}
           </div>

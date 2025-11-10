@@ -6,13 +6,13 @@ import Link from 'next/link'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
 import { productsApi } from '@/services/api'
-import { HiChevronRight } from 'react-icons/hi'
 import { LiaTelegramPlane } from 'react-icons/lia'
 import { HiDocumentText } from 'react-icons/hi'
 import NewsSection from '@/components/NewsSection'
 import QuoteSection from '@/components/QuoteSection'
 import FloatingContactButtons from '@/components/FloatingContactButtons'
 import ScrollToTop from '@/components/ScrollToTop'
+import HeroSectionWithBreadcrumb from '@/components/HeroSectionWithBreadcrumb'
 
 interface Product {
   id: string
@@ -232,44 +232,28 @@ export default function ProductDetailPage() {
     return 'xuất khẩu Tấn Phát'
   }
 
+  // Get page value for banner API based on product type
+  const getBannerPage = () => {
+    if (product.type === 'fresh') return 'products-fresh'
+    if (product.type === 'dried') return 'products-dried'
+    if (product.type === 'powder') return 'products-powder'
+    return 'products'
+  }
+
   return (
     <div className="min-h-screen bg-white">
       <Header />
       <main>
         {/* Hero Section with Breadcrumb */}
-        <section className="relative min-h-screen pb-8 bg-gray-200">
-          <div className="container w-full h-full mx-auto px-4 max-w-7xl">
-            {/* Breadcrumb */}
-            <div className="absolute bottom-0 right-0 left-0 flex items-center justify-center gap-2 text-sm mb-4">
-              <div className='w-fit bg-white rounded-xl p-2 flex items-center justify-center gap-2'>
-              <Link
-                href="/"
-                className="text-gray-600 hover:text-[#00652E] transition-colors"
-              >
-                Trang chủ
-              </Link>
-              <HiChevronRight className="w-4 h-4 text-gray-400" />
-              <Link
-                href="/san-pham"
-                className="text-gray-600 hover:text-[#00652E] transition-colors"
-              >
-                Sản phẩm
-              </Link>
-              <HiChevronRight className="w-4 h-4 text-gray-400" />
-              <Link
-                href={getCategoryUrl()}
-                className="text-gray-600 hover:text-[#00652E] transition-colors"
-              >
-                {getCategoryName()}
-              </Link>
-              <HiChevronRight className="w-4 h-4 text-gray-400" />
-              <span className="text-[#00652E] font-semibold line-clamp-1">
-                {product.title}
-              </span>
-              </div>
-            </div>
-          </div>
-        </section>
+        <HeroSectionWithBreadcrumb
+          page={getBannerPage()}
+          breadcrumbItems={[
+            { label: 'Trang chủ', href: '/' },
+            { label: 'Sản phẩm', href: '/san-pham' },
+            { label: getCategoryName(), href: getCategoryUrl() },
+            { label: product.title, href: null },
+          ]}
+        />
 
         {/* PART 1: Product Summary Section (Top) */}
         <section className="py-8 md:py-12 bg-white">
@@ -346,7 +330,7 @@ export default function ProductDetailPage() {
                         </h3>
                         <ul className="space-y-3">
                           {product.features.map((feature, index) => (
-                            <li key={index} className="flex items-start gap-3">
+                            <li key={index} className="flex items-center gap-3">
                               <span className="text-[#00652E] mt-1.5">•</span>
                               <span className="text-gray-700 text-sm md:text-base leading-relaxed">
                                 {feature}
@@ -424,10 +408,10 @@ export default function ProductDetailPage() {
 
                   {/* Call to Action Button - Fixed at bottom */}
                   <div className="flex-shrink-0 pt-4 border-t border-gray-200">
-                    <button className="button-primary w-full inline-flex items-center justify-center gap-2">
+                    <Link href="/lien-he" className="button-primary w-full inline-flex items-center justify-center gap-2">
                       <span>Liên hệ báo giá</span>
                       <LiaTelegramPlane className="w-5 h-5" />
-                    </button>
+                    </Link>
                   </div>
                 </div>
               </div>
@@ -441,7 +425,7 @@ export default function ProductDetailPage() {
             {/* Main Title - Removed duplicate title, using h2 for section heading */}
             <div className="mb-8 md:mb-12">
               <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-[#00652E] mb-4">
-                Thông tin chi tiết sản phẩm
+                Thông tin sản phẩm
               </h2>
               {product.companyIntro && (
                 <p className="text-base md:text-lg text-gray-700 leading-relaxed max-w-4xl">
@@ -467,7 +451,7 @@ export default function ProductDetailPage() {
                         </p>
                       </div>
                       {/* Hiển thị qualityImage nếu có, nếu không thì hiển thị ảnh chính */}
-                      {(product.qualityImage || product.image) && (
+                      {/* {(product.qualityImage || product.image) && (
                         <div className="rounded-2xl overflow-hidden shadow-lg">
                           <img
                             src={product.qualityImage || product.image}
@@ -478,20 +462,20 @@ export default function ProductDetailPage() {
                             }}
                           />
                         </div>
-                      )}
+                      )} */}
                     </div>
                   </div>
                 )}
 
                 {/* Section 2: Đặc điểm nổi bật (Expanded) */}
-                {product.features && product.features.length > 0 && (
+                {/* {product.features && product.features.length > 0 && (
                   <div className="bg-white rounded-2xl border border-gray-200 p-6 md:p-8 lg:p-10">
                     <h2 className="text-2xl md:text-3xl font-bold text-[#00652E] mb-6">
                       2. Đặc điểm nổi bật
                     </h2>
                     <ul className="space-y-4">
                       {product.features.map((feature, index) => (
-                        <li key={index} className="flex items-start gap-3">
+                        <li key={index} className="flex items-center gap-3">
                           <span className="text-[#00652E] mt-1.5 font-bold text-xl">•</span>
                           <span className="text-gray-700 text-base md:text-lg leading-relaxed">
                             {feature}
@@ -500,7 +484,7 @@ export default function ProductDetailPage() {
                       ))}
                     </ul>
                   </div>
-                )}
+                )} */}
 
                 {/* Section 3: Tiêu chuẩn & Chứng nhận - chỉ hiển thị nếu có chứng nhận */}
                 {product.certifications && (
@@ -510,7 +494,7 @@ export default function ProductDetailPage() {
                    (product.certifications.co && product.certifications.co.trim())) && (
                     <div className="bg-white rounded-2xl border border-gray-200 p-6 md:p-8 lg:p-10">
                       <h2 className="text-2xl md:text-3xl font-bold text-[#00652E] mb-6">
-                        3. Tiêu chuẩn & Chứng nhận
+                        2. Tiêu chuẩn & Chứng nhận
                       </h2>
                       <p className="text-base md:text-lg text-gray-700 leading-relaxed mb-6">
                         Tấn Phát Food giám sát nghiêm ngặt từ khâu canh tác, thu hoạch, phân loại đến đóng gói. Các chứng nhận và tiêu chuẩn quốc tế đảm bảo chất lượng và an toàn thực phẩm tuyệt đối.
@@ -549,7 +533,7 @@ export default function ProductDetailPage() {
                 {(product.markets || product.supplyCapacity) && (
                   <div className="bg-gradient-to-br from-white to-[#E6F7ED] rounded-2xl p-6 md:p-8 lg:p-10">
                     <h2 className="text-2xl md:text-3xl font-bold text-[#00652E] mb-6">
-                      4. Thị trường & Năng lực cung ứng
+                      3. Thị trường & Năng lực cung ứng
                     </h2>
                     {product.markets && product.markets.length > 0 && (
                       <div className="mb-6">

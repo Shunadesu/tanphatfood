@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
-import { HiArrowLeft, HiX, HiPlus } from 'react-icons/hi'
+import { HiArrowLeft, HiX, HiPlus, HiRefresh } from 'react-icons/hi'
+import ReactQuill from 'react-quill'
+import 'react-quill/dist/quill.snow.css'
 import { categoriesApi, productsApi, uploadApi } from '../../services/api'
 
 interface Category {
@@ -30,7 +32,6 @@ export default function ProductNew() {
     },
     companyIntro: '',
     qualityDescription: '',
-    qualityImage: '',
     certifications: {
       haccp: false,
       globalgap: false,
@@ -157,14 +158,35 @@ export default function ProductNew() {
           [name]: type === 'checkbox' ? checked : type === 'number' ? Number(value) : value,
         }
         
-        // Tự động tạo slug từ tên nếu người dùng thay đổi tên và chưa có slug hoặc slug rỗng
-        if (name === 'name' && (!prev.slug || prev.slug === '')) {
-          updated.slug = generateSlug(value)
+        // Xử lý slug khi thay đổi tên sản phẩm
+        if (name === 'name') {
+          // Nếu xóa tên sản phẩm (value rỗng), xóa cả slug
+          if (!value || value.trim() === '') {
+            updated.slug = ''
+          }
         }
         
         return updated
       })
     }
+  }
+
+  const handleGenerateSlug = () => {
+    if (formData.name && formData.name.trim()) {
+      setFormData(prev => ({
+        ...prev,
+        slug: generateSlug(prev.name),
+      }))
+    } else {
+      alert('Vui lòng nhập tên sản phẩm trước')
+    }
+  }
+
+  const handleContentChange = (value: string) => {
+    setFormData(prev => ({
+      ...prev,
+      fullDescription: value,
+    }))
   }
 
   const handleAddFeature = () => {
@@ -393,9 +415,6 @@ export default function ProductNew() {
         productData.qualityDescription = formData.qualityDescription.trim()
       }
 
-      if (formData.qualityImage && formData.qualityImage.trim()) {
-        productData.qualityImage = formData.qualityImage.trim()
-      }
 
       // Certifications - only include if at least one field has value
       if (formData.certifications) {
@@ -539,16 +558,28 @@ export default function ProductNew() {
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Slug (URL)
                 </label>
-                <input
-                  type="text"
-                  name="slug"
-                  value={formData.slug}
-                  onChange={handleInputChange}
-                  placeholder="Tự động tạo từ tên sản phẩm"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00652E]"
-                />
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    name="slug"
+                    value={formData.slug}
+                    onChange={handleInputChange}
+                    placeholder="Nhập slug hoặc click nút để tạo tự động"
+                    className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00652E]"
+                  />
+                  <button
+                    type="button"
+                    onClick={handleGenerateSlug}
+                    disabled={!formData.name || !formData.name.trim()}
+                    className="px-4 py-2 bg-[#00652E] text-white rounded-lg hover:bg-[#005a28] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 whitespace-nowrap"
+                    title="Tạo slug từ tên sản phẩm"
+                  >
+                    <HiRefresh className="w-5 h-5" />
+                    <span className="hidden sm:inline">Tạo slug</span>
+                  </button>
+                </div>
                 <p className="mt-1 text-sm text-gray-500">
-                  Slug sẽ được tự động tạo từ tên sản phẩm nếu để trống
+                  Click nút "Tạo slug" để tự động tạo slug từ tên sản phẩm
                 </p>
               </div>
 
@@ -609,7 +640,7 @@ export default function ProductNew() {
 
             <div className="mt-4">
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Ghi chú
+                Thông tin sản phẩm
               </label>
               <textarea
                 name="note"
@@ -619,9 +650,7 @@ export default function ProductNew() {
                 placeholder="Ghi chú nội bộ về sản phẩm..."
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00652E]"
               />
-              <p className="mt-1 text-sm text-gray-500">
-                Ghi chú nội bộ, không hiển thị cho khách hàng
-              </p>
+              
             </div>
           </div>
 
@@ -657,33 +686,6 @@ export default function ProductNew() {
                 )}
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Ảnh chất lượng
-                </label>
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={(e) => handleImageUpload(e, 'qualityImage')}
-                  disabled={uploadingImage === 'qualityImage'}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00652E] disabled:opacity-50"
-                />
-                {uploadingImage === 'qualityImage' && (
-                  <p className="mt-2 text-sm text-gray-500">Đang upload...</p>
-                )}
-                {formData.qualityImage && (
-                  <div className="mt-2 relative inline-block">
-                    <img src={formData.qualityImage} alt="Quality Preview" className="w-32 h-32 object-cover rounded" />
-                    <button
-                      type="button"
-                      onClick={() => setFormData(prev => ({ ...prev, qualityImage: '' }))}
-                      className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1"
-                    >
-                      <HiX className="w-4 h-4" />
-                    </button>
-                  </div>
-                )}
-              </div>
 
               <div className="md:col-span-2">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -1022,69 +1024,33 @@ export default function ProductNew() {
 
           {/* Full Description */}
           <div>
-            <h2 className="text-xl font-bold text-gray-900 mb-4">Mô tả đầy đủ (HTML)</h2>
-            <textarea
-              name="fullDescription"
-              value={formData.fullDescription}
-              onChange={handleInputChange}
-              rows={10}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00652E] font-mono text-sm"
-              placeholder="Nhập mô tả đầy đủ với HTML (có thể dùng các thẻ HTML như &lt;p&gt;, &lt;strong&gt;, &lt;ul&gt;, &lt;li&gt;...)"
-            />
+            <h2 className="text-xl font-bold text-gray-900 mb-4">Mô tả đầy đủ</h2>
+            <div className="border border-gray-300 rounded-lg">
+              <ReactQuill
+                theme="snow"
+                value={formData.fullDescription}
+                onChange={handleContentChange}
+                modules={{
+                  toolbar: [
+                    [{ 'header': [1, 2, 3, false] }],
+                    ['bold', 'italic', 'underline', 'strike'],
+                    [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                    [{ 'align': [] }],
+                    ['link', 'image'],
+                    [{ 'color': [] }, { 'background': [] }],
+                    ['clean'],
+                  ],
+                }}
+                placeholder="Nhập mô tả đầy đủ về sản phẩm..."
+                className="bg-white"
+                style={{ minHeight: '300px' }}
+              />
+            </div>
             <p className="mt-2 text-sm text-gray-500">
-              Bạn có thể sử dụng HTML để định dạng nội dung. Ví dụ: &lt;p&gt;Đoạn văn&lt;/p&gt;, &lt;strong&gt;In đậm&lt;/strong&gt;
+              Sử dụng thanh công cụ để định dạng nội dung, thêm link, tiêu đề, danh sách, v.v.
             </p>
           </div>
 
-          {/* Specifications */}
-          <div>
-            <h2 className="text-xl font-bold text-gray-900 mb-4">Thông số kỹ thuật</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-              <input
-                type="text"
-                value={newSpecKey}
-                onChange={(e) => setNewSpecKey(e.target.value)}
-                placeholder="Tên thông số (ví dụ: Kích thước)"
-                className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00652E]"
-              />
-              <div className="flex gap-2">
-                <input
-                  type="text"
-                  value={newSpecValue}
-                  onChange={(e) => setNewSpecValue(e.target.value)}
-                  placeholder="Giá trị (ví dụ: 10-15cm)"
-                  className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00652E]"
-                />
-                <button
-                  type="button"
-                  onClick={handleAddSpecification}
-                  className="px-4 py-2 bg-[#00652E] text-white rounded-lg hover:bg-[#005a28] transition-colors flex items-center gap-2"
-                >
-                  <HiPlus className="w-5 h-5" />
-                  Thêm
-                </button>
-              </div>
-            </div>
-            {Object.keys(formData.specifications).length > 0 && (
-              <div className="space-y-2">
-                {Object.entries(formData.specifications).map(([key, value]) => (
-                  <div key={key} className="flex items-center justify-between bg-gray-50 p-3 rounded-lg">
-                    <div className="flex-1">
-                      <span className="font-semibold text-gray-900">{key}:</span>
-                      <span className="ml-2 text-gray-700">{value}</span>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => handleRemoveSpecification(key)}
-                      className="text-red-600 hover:text-red-800"
-                    >
-                      <HiX className="w-5 h-5" />
-                    </button>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
 
           {/* Price & Unit */}
           <div>

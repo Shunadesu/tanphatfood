@@ -178,7 +178,7 @@ export default function Products() {
                     }}
                   />
                   {/* Status Badge */}
-                  <div className="absolute top-2 right-2">
+                  <div className="absolute top-2 right-2 flex flex-col gap-2 items-end">
                     <span
                       className={`px-2 py-1 text-xs font-semibold rounded-full ${
                         product.isActive
@@ -188,6 +188,11 @@ export default function Products() {
                     >
                       {product.isActive ? 'Hoạt động' : 'Tạm khóa'}
                     </span>
+                    {product.isFeatured && (
+                      <span className="px-2 py-1 text-xs font-semibold rounded-full bg-yellow-500 text-white">
+                        Nổi bật
+                      </span>
+                    )}
                   </div>
                 </div>
 

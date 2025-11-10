@@ -1,41 +1,77 @@
 'use client'
 
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { HiArrowRight } from 'react-icons/hi'
+import { productsApi } from '@/services/api'
 
-const FeaturedProducts = () => {
-  const products = [
-    {
-      id: 1,
-      number: '01',
-      title: 'Trái cây tươi xuất khẩu',
-      description:
-        'Tấn Phát Food liên kết trực tiếp với các vùng nguyên liệu đạt chuẩn GlobalG.A.P, đảm bảo trái cây luôn được thu hoạch đúng độ chín, sơ chế và bảo quản theo quy trình khép kín. Chúng tôi cung cấp đa dạng các loại trái cây tươi như sầu riêng Ri6, bưởi da xanh, chuối già Nam Mỹ, xoài cát Hòa Lộc,… phục vụ cho thị trường xuất khẩu sang Trung Quốc, Hàn Quốc, Nhật Bản và châu Âu.',
-      imagePosition: 'left',
-      imageUrl: '/images/fresh-fruit.jpg',
-      link: '/san-pham/trai-cay-tuoi',
-    },
-    {
-      id: 2,
-      number: '02',
-      title: 'Trái cây sấy xuất khẩu',
-      description:
-        'Tấn Phát Food liên kết trực tiếp với các vùng nguyên liệu đạt chuẩn GlobalG.A.P, đảm bảo trái cây luôn được thu hoạch đúng độ chín, sơ chế và bảo quản theo quy trình khép kín. Chúng tôi cung cấp đa dạng các loại trái cây tươi như sầu riêng Ri6, bưởi da xanh, chuối già Nam Mỹ, xoài cát Hòa Lộc,… phục vụ cho thị trường xuất khẩu sang Trung Quốc, Hàn Quốc, Nhật Bản và châu Âu.',
-      imagePosition: 'right',
-      imageUrl: '/images/dried-fruits.jpg', // Placeholder - bạn sẽ thay sau
-      link: '/san-pham/trai-cay-say',
-    },
-    {
-      id: 3,
-      number: '03',
-      title: 'Bột Trái cây xuất khẩu',
-      description:
-        'Tấn Phát Food liên kết trực tiếp với các vùng nguyên liệu đạt chuẩn GlobalG.A.P, đảm bảo trái cây luôn được thu hoạch đúng độ chín, sơ chế và bảo quản theo quy trình khép kín. Chúng tôi cung cấp đa dạng các loại trái cây tươi như sầu riêng Ri6, bưởi da xanh, chuối già Nam Mỹ, xoài cát Hòa Lộc,… phục vụ cho thị trường xuất khẩu sang Trung Quốc, Hàn Quốc, Nhật Bản và châu Âu.',
-      imagePosition: 'left',
-      imageUrl: '/images/fruit-powder.jpg', // Placeholder - bạn sẽ thay sau
-      link: '/san-pham/bot-trai-cay',
-    },
-  ]
+interface FeaturedProduct {
+  id: string
+  number: string
+  title: string
+  description: string
+  imagePosition: 'left' | 'right'
+  imageUrl: string
+  link: string
+}
+
+const FeaturedProductsList = () => {
+  const [products, setProducts] = useState<FeaturedProduct[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    const fetchFeaturedProducts = async () => {
+      try {
+        setLoading(true)
+        setError(null)
+        const response = await productsApi.getFeatured(10) // Lấy tối đa 10 sản phẩm nổi bật
+        
+        if (response.success && response.data) {
+          const responseData = response.data as any
+          const productsData = Array.isArray(responseData) ? responseData : (responseData?.data || [])
+          
+          // Map dữ liệu từ API sang format hiện tại
+          const mappedProducts: FeaturedProduct[] = productsData.map((product: any, index: number) => {
+            // Tạo link từ slug hoặc type
+            let link = '/san-pham'
+            if (product.slug) {
+              link = `/san-pham/${product.slug}`
+            } else if (product.type === 'fresh') {
+              link = '/san-pham/trai-cay-tuoi'
+            } else if (product.type === 'dried') {
+              link = '/san-pham/trai-cay-say'
+            } else if (product.type === 'powder') {
+              link = '/san-pham/bot-trai-cay'
+            }
+
+            return {
+              id: product.id || product._id || String(index + 1),
+              number: String(index + 1).padStart(2, '0'),
+              title: product.title || product.name || '',
+              description: product.description || product.shortDescription || '',
+              imagePosition: index % 2 === 0 ? 'left' : 'right' as 'left' | 'right',
+              imageUrl: product.image || product.images?.[0] || '/images/placeholder.jpg',
+              link: link,
+            }
+          })
+          
+          setProducts(mappedProducts)
+        } else {
+          setError(response.message || 'Không thể tải sản phẩm nổi bật')
+          setProducts([])
+        }
+      } catch (err) {
+        console.error('Error fetching featured products:', err)
+        setError('Đã xảy ra lỗi khi tải sản phẩm nổi bật')
+        setProducts([])
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchFeaturedProducts()
+  }, [])
 
   return (
     <section className="py-12 md:py-16 lg:py-20 ">
@@ -43,18 +79,38 @@ const FeaturedProducts = () => {
         {/* Header Section */}
         <div className="text-center mb-12 md:mb-16 lg:mb-20">
           <h2 className="title text-2xl md:text-3xl lg:text-4xl">
-            Danh mục sản phẩm tiêu biểu
+            Sản phẩm nổi bật
           </h2>
           <p className="text-base md:text-lg lg:text-xl text-gray-700 max-w-4xl mx-auto leading-relaxed mt-4 px-4">
-            Từ những nông trại đạt chuẩn GlobalG.A.P, Tấn Phát Food cung cấp
-            đa dạng các loại trái cây tươi được yêu thích tại thị trường quốc
-            tế.
+            Những sản phẩm được yêu thích và đánh giá cao từ khách hàng
           </p>
         </div>
 
+        {/* Loading State */}
+        {loading && (
+          <div className="text-center py-16">
+            <div className="inline-block animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#00652E]"></div>
+            <p className="mt-4 text-gray-600">Đang tải sản phẩm nổi bật...</p>
+          </div>
+        )}
+
+        {/* Error State */}
+        {error && !loading && (
+          <div className="text-center py-16">
+            <p className="text-red-600 mb-4">{error}</p>
+            <button
+              onClick={() => window.location.reload()}
+              className="button-primary"
+            >
+              Thử lại
+            </button>
+          </div>
+        )}
+
         {/* Product Cards */}
-        <div className="space-y-8 md:space-y-10 lg:space-y-12">
-          {products.map((product) => (
+        {!loading && !error && products.length > 0 && (
+          <div className="space-y-8 md:space-y-10 lg:space-y-12">
+            {products.map((product) => (
             <div
               key={product.id}
               className="bg-white rounded-xl md:rounded-2xl shadow-lg overflow-hidden hover:shadow-2xl transition-all duration-300"
@@ -73,6 +129,9 @@ const FeaturedProducts = () => {
                       src={product.imageUrl} 
                       alt={product.title} 
                       className="w-full h-full object-cover" 
+                      onError={(e) => {
+                        e.currentTarget.src = '/images/placeholder.jpg'
+                      }}
                     />
                     {product.imagePosition === 'left' && (
                       <div className="bg-white w-[90%] sm:w-4/5 md:w-3/5 lg:w-1/2 h-auto absolute top-4 right-2 sm:top-6 sm:right-4 md:top-8 md:right-4 lg:right-4 bottom-4 sm:bottom-6 md:bottom-8 lg:bottom-10 p-4 sm:p-5 md:p-6 lg:p-8 xl:p-10 rounded-2xl md:rounded-3xl flex flex-col shadow-lg">
@@ -154,12 +213,20 @@ const FeaturedProducts = () => {
                 </div>
               </div>
             </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
+
+        {/* Empty State */}
+        {!loading && !error && products.length === 0 && (
+          <div className="text-center py-16">
+            <p className="text-gray-600">Chưa có sản phẩm nổi bật nào</p>
+          </div>
+        )}
       </div>
     </section>
   )
 }
 
-export default FeaturedProducts
+export default FeaturedProductsList
 

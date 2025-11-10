@@ -2,14 +2,13 @@
 
 import { useParams, useRouter } from 'next/navigation'
 import { useState } from 'react'
-import Link from 'next/link'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
 import { getDriedProductBySlug } from '@/data/mockDriedProducts'
-import { HiChevronRight } from 'react-icons/hi'
 import { LiaTelegramPlane } from 'react-icons/lia'
 import FloatingContactButtons from '@/components/FloatingContactButtons'
 import ScrollToTop from '@/components/ScrollToTop'
+import HeroSectionWithBreadcrumb from '@/components/HeroSectionWithBreadcrumb'
 
 export default function DriedProductDetailPage() {
   const params = useParams()
@@ -40,39 +39,15 @@ export default function DriedProductDetailPage() {
       <Header />
       <main>
         {/* Hero Section with Breadcrumb */}
-        <section className="relative min-h-screen pb-8 bg-gray-200">
-          <div className="container w-full h-full mx-auto px-4 max-w-7xl">
-            {/* Breadcrumb */}
-            <div className="absolute bottom-0 right-0 left-0 flex items-center justify-center gap-2 text-sm mb-4">
-              <div className='w-fit bg-white rounded-xl p-2 flex items-center justify-center gap-2'>
-              <Link
-                href="/"
-                className="text-gray-600 hover:text-[#00652E] transition-colors"
-              >
-                Trang chủ
-              </Link>
-              <HiChevronRight className="w-4 h-4 text-gray-400" />
-              <Link
-                href="/san-pham"
-                className="text-gray-600 hover:text-[#00652E] transition-colors"
-              >
-                Sản phẩm
-              </Link>
-              <HiChevronRight className="w-4 h-4 text-gray-400" />
-              <Link
-                href="/san-pham/trai-cay-say"
-                className="text-gray-600 hover:text-[#00652E] transition-colors"
-              >
-                Trái cây sấy xuất khẩu
-              </Link>
-              <HiChevronRight className="w-4 h-4 text-gray-400" />
-              <span className="text-[#00652E] font-semibold line-clamp-1">
-                {product.title}
-              </span>
-              </div>
-            </div>
-          </div>
-        </section>
+        <HeroSectionWithBreadcrumb
+          page="products-dried"
+          breadcrumbItems={[
+            { label: 'Trang chủ', href: '/' },
+            { label: 'Sản phẩm', href: '/san-pham' },
+            { label: 'Trái cây sấy xuất khẩu', href: '/san-pham/trai-cay-say' },
+            { label: product.title, href: null },
+          ]}
+        />
 
         {/* Product Detail Section */}
         <section className="py-8 md:py-12 bg-white">
@@ -180,7 +155,7 @@ export default function DriedProductDetailPage() {
                     </h3>
                     <ul className="space-y-3">
                       {product.features.map((feature, index) => (
-                        <li key={index} className="flex items-start gap-3">
+                        <li key={index} className="flex items-center gap-3">
                           <span className="text-[#00652E] mt-1.5">•</span>
                           <span className="text-gray-700 text-sm md:text-base leading-relaxed">
                             {feature}

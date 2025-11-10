@@ -22,6 +22,7 @@ interface Product {
   image: string
   slug: string
   type: string
+  isFeatured?: boolean
 }
 
 export default function DriedFruitsPage() {
@@ -156,6 +157,7 @@ export default function DriedFruitsPage() {
                       image={product.image}
                       slug={product.slug}
                       category="dried"
+                      isFeatured={product.isFeatured}
                     />
                   ))}
                 </div>

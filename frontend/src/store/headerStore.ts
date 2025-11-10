@@ -24,6 +24,8 @@ interface HeaderState {
 // Cache duration: 5 minutes (300000 ms)
 const CACHE_DURATION = 5 * 60 * 1000
 const STORAGE_KEY = 'header-store'
+const CACHE_VERSION = '1.1.0' // Increment this to invalidate all caches
+const CACHE_VERSION_KEY = 'header-store-version'
 
 // Helper functions để lưu/đọc từ localStorage
 const loadFromStorage = (): Partial<HeaderState> | null => {
@@ -68,18 +70,52 @@ export const useHeaderStore = create<HeaderState>((set, get) => ({
     // Chỉ chạy ở client-side
     if (typeof window === 'undefined') return
     
+    // Check cache version - if different or missing, clear all cache
+    try {
+      const storedVersion = localStorage.getItem(CACHE_VERSION_KEY)
+      if (!storedVersion || storedVersion !== CACHE_VERSION) {
+        // Cache version mismatch or missing (old cache), clear old cache
+        localStorage.removeItem(STORAGE_KEY)
+        localStorage.setItem(CACHE_VERSION_KEY, CACHE_VERSION)
+        return
+      }
+    } catch (error) {
+      console.error('Error checking cache version:', error)
+      // If error, clear cache to be safe
+      try {
+        localStorage.removeItem(STORAGE_KEY)
+        localStorage.setItem(CACHE_VERSION_KEY, CACHE_VERSION)
+      } catch (e) {
+        // Ignore
+      }
+      return
+    }
+    
     const storedData = loadFromStorage()
     if (storedData) {
       const state = get()
-      // Chỉ load nếu chưa có data hoặc data trong store rỗng
-      if (!state.loaded || (state.products.fresh.length === 0 && 
+      const now = Date.now()
+      
+      // Only load if cache is still valid
+      const cacheValid = storedData.lastFetchTime && 
+        (now - storedData.lastFetchTime) < CACHE_DURATION
+      
+      // Chỉ load nếu chưa có data hoặc data trong store rỗng, và cache còn valid
+      if (cacheValid && (!state.loaded || (state.products.fresh.length === 0 && 
           state.products.dried.length === 0 && 
-          state.products.powder.length === 0)) {
+          state.products.powder.length === 0))) {
         set({
           products: storedData.products || state.products,
           loaded: storedData.loaded || false,
           lastFetchTime: storedData.lastFetchTime || null,
         })
+      }
+    } else {
+      // No stored data, set cache version
+      try {
+        localStorage.setItem(CACHE_VERSION_KEY, CACHE_VERSION)
+      } catch (error) {
+        console.error('Error setting cache version:', error)
       }
     }
   },

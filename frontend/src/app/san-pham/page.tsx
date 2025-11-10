@@ -22,6 +22,7 @@ interface UnifiedProduct {
   slug: string
   category: ProductCategory
   categoryName: string
+  isFeatured?: boolean
 }
 
 export default function ProductsPage() {
@@ -247,6 +248,7 @@ export default function ProductsPage() {
                       image={product.image}
                       slug={product.slug}
                       category={product.category !== 'all' ? product.category : undefined}
+                      isFeatured={product.isFeatured}
                     />
                   ))}
                 </div>

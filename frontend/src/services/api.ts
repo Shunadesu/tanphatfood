@@ -22,6 +22,7 @@ export const productsApi = {
     category?: string
     search?: string
     isActive?: boolean
+    isFeatured?: boolean
   }): Promise<ApiResponse<any[]>> => {
     const queryParams = new URLSearchParams()
     if (params?.page) queryParams.append('page', params.page.toString())
@@ -30,6 +31,17 @@ export const productsApi = {
     if (params?.category) queryParams.append('category', params.category)
     if (params?.search) queryParams.append('search', params.search)
     if (params?.isActive !== undefined) queryParams.append('isActive', params.isActive.toString())
+    if (params?.isFeatured !== undefined) queryParams.append('isFeatured', params.isFeatured.toString())
+
+    const response = await fetch(`${API_URL}/products?${queryParams.toString()}`)
+    return response.json()
+  },
+
+  getFeatured: async (limit?: number): Promise<ApiResponse<any[]>> => {
+    const queryParams = new URLSearchParams()
+    queryParams.append('isFeatured', 'true')
+    queryParams.append('isActive', 'true')
+    if (limit) queryParams.append('limit', limit.toString())
 
     const response = await fetch(`${API_URL}/products?${queryParams.toString()}`)
     return response.json()

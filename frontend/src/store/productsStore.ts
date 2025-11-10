@@ -11,6 +11,7 @@ export interface Product {
   type: 'fresh' | 'dried' | 'powder'
   category?: string
   isActive?: boolean
+  isFeatured?: boolean
   createdAt?: string
   updatedAt?: string
 }
@@ -31,6 +32,12 @@ interface ProductsCache {
   }
 }
 
+interface ProductsByTypeCache {
+  fresh: { products: Product[], lastFetchTime: number }
+  dried: { products: Product[], lastFetchTime: number }
+  powder: { products: Product[], lastFetchTime: number }
+}
+
 interface ProductsState {
   // Products organized by type (for quick access)
   productsByType: ProductsByType
@@ -40,6 +47,9 @@ interface ProductsState {
   
   // Single product cache (by slug)
   productBySlug: Record<string, Product>
+  
+  // Cache metadata for productsByType
+  productsByTypeCache: ProductsByTypeCache
   
   loading: boolean
   loadedTypes: string[]
@@ -65,6 +75,8 @@ interface ProductsState {
 // Cache duration: 5 minutes (300000 ms)
 const CACHE_DURATION = 5 * 60 * 1000
 const STORAGE_KEY = 'products-store'
+const CACHE_VERSION = '1.1.0' // Increment this to invalidate all caches (changed to clear old test-01 data)
+const CACHE_VERSION_KEY = 'products-store-version'
 
 // Helper function to generate cache key
 const getCacheKey = (params: {
@@ -107,6 +119,7 @@ const saveToStorage = (state: Partial<ProductsState>) => {
       cachedProducts: state.cachedProducts,
       productBySlug: state.productBySlug,
       loadedTypes: state.loadedTypes || [],
+      productsByTypeCache: state.productsByTypeCache,
     }
     localStorage.setItem(STORAGE_KEY, JSON.stringify(dataToSave))
   } catch (error) {
@@ -139,38 +152,175 @@ export const useProductsStore = create<ProductsState>((set, get) => ({
   },
   cachedProducts: {},
   productBySlug: {},
+  productsByTypeCache: {
+    fresh: { products: [], lastFetchTime: 0 },
+    dried: { products: [], lastFetchTime: 0 },
+    powder: { products: [], lastFetchTime: 0 },
+  },
   loading: false,
   loadedTypes: [],
   
   initializeFromStorage: () => {
     if (typeof window === 'undefined') return
     
+    // Check cache version - if different or missing, clear all cache
+    try {
+      const storedVersion = localStorage.getItem(CACHE_VERSION_KEY)
+      if (!storedVersion || storedVersion !== CACHE_VERSION) {
+        // Cache version mismatch or missing (old cache), clear old cache
+        localStorage.removeItem(STORAGE_KEY)
+        localStorage.setItem(CACHE_VERSION_KEY, CACHE_VERSION)
+        return
+      }
+    } catch (error) {
+      console.error('Error checking cache version:', error)
+      // If error, clear cache to be safe
+      try {
+        localStorage.removeItem(STORAGE_KEY)
+        localStorage.setItem(CACHE_VERSION_KEY, CACHE_VERSION)
+      } catch (e) {
+        // Ignore
+      }
+      return
+    }
+    
     const storedData = loadFromStorage()
     if (storedData) {
       const state = get()
+      const now = Date.now()
+      
+      // Only load from cache if it's still valid (less than cache duration)
+      // If cache metadata doesn't exist or is expired, don't load productsByType
+      // This ensures we always fetch fresh data when needed
+      let validProductsByType: ProductsByType = {
+        fresh: [],
+        dried: [],
+        powder: [],
+      }
+      
+      let validCache: ProductsByTypeCache = {
+        fresh: { products: [], lastFetchTime: 0 },
+        dried: { products: [], lastFetchTime: 0 },
+        powder: { products: [], lastFetchTime: 0 },
+      }
+      
+      if (storedData.productsByTypeCache) {
+        const cache = storedData.productsByTypeCache as ProductsByTypeCache
+        Object.keys(cache).forEach((type) => {
+          const typeKey = type as keyof ProductsByTypeCache
+          const cacheData = cache[typeKey]
+          if (cacheData && cacheData.lastFetchTime > 0) {
+            const cacheAge = now - cacheData.lastFetchTime
+            // Check if cache contains old test data (test-01) - if so, invalidate it
+            const hasOldTestData = cacheData.products.some(
+              (p: Product) => p.slug === 'test-01' || p.title?.toLowerCase().includes('test-01')
+            )
+            
+            if (!hasOldTestData && cacheAge < CACHE_DURATION && cacheData.products.length > 0) {
+              // Cache is valid and doesn't contain old test data
+              validProductsByType[typeKey] = cacheData.products
+              validCache[typeKey] = {
+                products: cacheData.products,
+                lastFetchTime: cacheData.lastFetchTime,
+              }
+            }
+          }
+        })
+      }
+      
+      // Also check productsByType directly for old test data (fallback for old cache format)
+      if (storedData.productsByType) {
+        const oldProducts = storedData.productsByType as ProductsByType
+        const hasOldTestData = Object.values(oldProducts).some(products =>
+          products.some((p: Product) => p.slug === 'test-01' || p.title?.toLowerCase().includes('test-01'))
+        )
+        if (hasOldTestData) {
+          // Old cache contains test data, don't use it
+          validProductsByType = {
+            fresh: [],
+            dried: [],
+            powder: [],
+          }
+        }
+      }
+      // If no valid cache metadata, don't load productsByType (will fetch fresh from API)
+      
       set({
-        productsByType: storedData.productsByType || state.productsByType,
+        productsByType: validProductsByType,
         cachedProducts: storedData.cachedProducts || state.cachedProducts,
         productBySlug: storedData.productBySlug || state.productBySlug,
-        loadedTypes: storedData.loadedTypes || [],
+        loadedTypes: [], // Reset loadedTypes to force fresh fetch
+        productsByTypeCache: validCache,
       })
+    } else {
+      // No stored data, set cache version
+      try {
+        localStorage.setItem(CACHE_VERSION_KEY, CACHE_VERSION)
+      } catch (error) {
+        console.error('Error setting cache version:', error)
+      }
     }
   },
   
   fetchProductsByType: async (type: 'fresh' | 'dried' | 'powder', options = {}) => {
     const { limit = 10, force = false } = options
     const state = get()
+    const now = Date.now()
     
-    // Check cache
-    if (!force && state.loadedTypes.includes(type)) {
-      const cached = state.productsByType[type]
-      if (cached.length > 0) {
-        return cached.slice(0, limit)
+    // Check for old test data in cache - if found, always fetch fresh
+    const currentProducts = state.productsByType[type]
+    const hasOldTestData = currentProducts.some(
+      (p: Product) => p.slug === 'test-01' || p.title?.toLowerCase().includes('test-01')
+    )
+    
+    // If old test data is found, force fetch regardless of cache
+    const shouldForce = force || hasOldTestData
+    
+    // Check cache - only use if not forced and cache is still valid and no old test data
+    if (!shouldForce) {
+      const cacheData = state.productsByTypeCache[type]
+      if (cacheData && cacheData.lastFetchTime > 0) {
+        const cacheHasOldTestData = cacheData.products.some(
+          (p: Product) => p.slug === 'test-01' || p.title?.toLowerCase().includes('test-01')
+        )
+        
+        if (!cacheHasOldTestData) {
+          const cacheAge = now - cacheData.lastFetchTime
+          if (cacheAge < CACHE_DURATION && cacheData.products.length > 0) {
+            // Cache is valid and doesn't have old test data, use it
+            set((prevState) => ({
+              productsByType: {
+                ...prevState.productsByType,
+                [type]: cacheData.products,
+              },
+            }))
+            return cacheData.products.slice(0, limit)
+          }
+        }
+      }
+      
+      // Also check if already loaded (fallback) - but skip if has old test data
+      if (!hasOldTestData && state.loadedTypes.includes(type)) {
+        const cached = state.productsByType[type]
+        if (cached.length > 0) {
+          return cached.slice(0, limit)
+        }
       }
     }
     
-    // Check if already loading
-    if (state.loading) {
+    // If forcing or has old test data, clear old data for this type to avoid showing stale data
+    if (shouldForce) {
+      set((prevState) => ({
+        productsByType: {
+          ...prevState.productsByType,
+          [type]: [],
+        },
+      }))
+    }
+    
+    // Check if already loading - if forcing, allow multiple concurrent fetches
+    // Otherwise, return cached data if already loading
+    if (!shouldForce && state.loading) {
       return state.productsByType[type].slice(0, limit)
     }
     
@@ -184,11 +334,19 @@ export const useProductsStore = create<ProductsState>((set, get) => ({
       })
       
       const products = parseProducts(response)
+      const fetchTime = Date.now()
       
       set((prevState) => ({
         productsByType: {
           ...prevState.productsByType,
           [type]: products,
+        },
+        productsByTypeCache: {
+          ...prevState.productsByTypeCache,
+          [type]: {
+            products,
+            lastFetchTime: fetchTime,
+          },
         },
         loadedTypes: prevState.loadedTypes.includes(type) 
           ? prevState.loadedTypes 
@@ -248,10 +406,18 @@ export const useProductsStore = create<ProductsState>((set, get) => ({
       // Also update productsByType if type is specified
       if (apiParams.type && ['fresh', 'dried', 'powder'].includes(apiParams.type)) {
         const productType = apiParams.type as 'fresh' | 'dried' | 'powder'
+        const fetchTime = Date.now()
         set((prevState) => ({
           productsByType: {
             ...prevState.productsByType,
             [productType]: products,
+          },
+          productsByTypeCache: {
+            ...prevState.productsByTypeCache,
+            [productType]: {
+              products,
+              lastFetchTime: fetchTime,
+            },
           },
           loadedTypes: prevState.loadedTypes.includes(productType)
             ? prevState.loadedTypes
@@ -355,10 +521,29 @@ export const useProductsStore = create<ProductsState>((set, get) => ({
   },
   
   clearCache: () => {
+    if (typeof window !== 'undefined') {
+      try {
+        localStorage.removeItem(STORAGE_KEY)
+        localStorage.setItem(CACHE_VERSION_KEY, CACHE_VERSION)
+      } catch (error) {
+        console.error('Error clearing cache:', error)
+      }
+    }
+    
     set({
       cachedProducts: {},
       productBySlug: {},
       loadedTypes: [],
+      productsByTypeCache: {
+        fresh: { products: [], lastFetchTime: 0 },
+        dried: { products: [], lastFetchTime: 0 },
+        powder: { products: [], lastFetchTime: 0 },
+      },
+      productsByType: {
+        fresh: [],
+        dried: [],
+        powder: [],
+      },
     })
   },
 }))
@@ -373,6 +558,7 @@ if (typeof window !== 'undefined') {
       cachedProducts: state.cachedProducts,
       productBySlug: state.productBySlug,
       loadedTypes: state.loadedTypes,
+      productsByTypeCache: state.productsByTypeCache,
     })
     
     // Chỉ lưu nếu state thực sự thay đổi
@@ -382,6 +568,7 @@ if (typeof window !== 'undefined') {
         cachedProducts: state.cachedProducts,
         productBySlug: state.productBySlug,
         loadedTypes: state.loadedTypes,
+        productsByTypeCache: state.productsByTypeCache,
       })
       lastSavedState = currentState
     }

@@ -32,10 +32,17 @@ const PartnersSection = () => {
           {/* World Map Section */}
           <div className="p-6 md:p-8 lg:p-10">
             <div className="relative w-full rounded-2xl overflow-hidden">
+              {/* Desktop Image */}
               <img 
                 src="/images/doitac.jpg" 
                 alt="Global Partners Map" 
-                className="w-full h-[30vh] md:h-auto object-cover"
+                className="hidden md:block w-full h-auto object-cover"
+              />
+              {/* Mobile Image */}
+              <img 
+                src="/images/doitacmb.jpg" 
+                alt="Global Partners Map" 
+                className="block md:hidden w-full h-[30vh] object-cover"
               />
             </div>
           </div>
