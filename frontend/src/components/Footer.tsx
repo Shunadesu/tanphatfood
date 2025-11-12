@@ -79,13 +79,13 @@ const Footer = () => {
                 <h3 className="text-base font-semibold text-white mb-4">THÔNG TIN LIÊN HỆ</h3>
                 <ul className="space-y-3">
                     <li className="text-white text-sm">
-                    <span className="font-medium">Địa chỉ:</span> Số ...., Phường Long Khánh, Tỉnh Đồng Nai, Việt Nam
+                    <span className="font-medium">Địa chỉ:</span> Số 23, đường Nguyên Thị Minh Khai, Khu Phố 3, Phường Long Khánh, Tỉnh Đồng Nai
                     </li>
                     <li className="text-white text-sm">
-                    <span className="font-medium">Điện thoại:</span> +84 9xx
+                    <span className="font-medium">Điện thoại:</span> +84 913 224 378 
                     </li>
                     <li className="text-white text-sm">
-                    <span className="font-medium">Email:</span> sale9@xx.com
+                    <span className="font-medium">Email:</span> sale9@tanphatfoodvn.com
                     </li>
                 </ul>
                 </div>
@@ -119,54 +119,11 @@ const Footer = () => {
                     Bột trái cây tự nhiên
                   </Link>
                 </li>
-                <li>
-                  <Link
-                    href="/san-pham/gia-vi"
-                    className="text-white hover:text-[#00CB5C] transition-colors duration-300 text-sm"
-                  >
-                    Gia vị – Nông sản khô
-                  </Link>
-                </li>
+               
               </ul>
             </div>
-
-            {/* Column 3: Hỗ trợ khách hàng + Social Media */}
+                        {/* Column 3: Hỗ trợ khách hàng + Social Media */}
             <div>
-              <h3 className="text-base font-semibold text-white mb-4">HỖ TRỢ KHÁCH HÀNG</h3>
-              <ul className="space-y-3 mb-6">
-                <li>
-                  <Link
-                    href="/cooperation-policy"
-                    className="text-white hover:text-[#00CB5C] transition-colors duration-300 text-sm"
-                  >
-                    Chính sách hợp tác
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    href="/export-process"
-                    className="text-white hover:text-[#00CB5C] transition-colors duration-300 text-sm"
-                  >
-                    Quy trình xuất khẩu
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    href="/faq"
-                    className="text-white hover:text-[#00CB5C] transition-colors duration-300 text-sm"
-                  >
-                    Câu hỏi thường gặp (FAQ)
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    href="/lien-he"
-                    className="text-white hover:text-[#00CB5C] transition-colors duration-300 text-sm"
-                  >
-                    Liên hệ
-                  </Link>
-                </li>
-              </ul>
               {/* Social Media */}
               <div>
                 <h3 className="text-base font-semibold text-white mb-4">KẾT NỐI MẠNG XÃ HỘI</h3>
@@ -192,6 +149,7 @@ const Footer = () => {
                 </ul>
               </div>
             </div>
+            
           </div>
         </div>
 
