@@ -1,23 +1,13 @@
 import { MetadataRoute } from 'next'
 import { getAllHandbook } from '@/data/mockHandbook'
-import { getAllNews } from '@/data/mockNews'
 
-export default function sitemap(): MetadataRoute.Sitemap {
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://tanphatfood.com'
 
-  // Generate handbook URLs
   const handbookArticles = getAllHandbook().map((article) => ({
-    url: `${baseUrl}/handbook/${article.slug}`,
+    url: `${baseUrl}/tin-tuc/${article.slug}`,
     lastModified: new Date(),
     changeFrequency: 'monthly' as const,
-    priority: 0.7,
-  }))
-
-  // Generate news URLs
-  const newsArticles = getAllNews().map((article) => ({
-    url: `${baseUrl}/news/${article.slug}`,
-    lastModified: new Date(),
-    changeFrequency: 'weekly' as const,
     priority: 0.7,
   }))
 
@@ -59,19 +49,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.8,
     },
     {
-      url: `${baseUrl}/handbook`,
+      url: `${baseUrl}/tin-tuc`,
       lastModified: new Date(),
       changeFrequency: 'weekly',
       priority: 0.8,
     },
     ...handbookArticles,
-    {
-      url: `${baseUrl}/news`,
-      lastModified: new Date(),
-      changeFrequency: 'weekly',
-      priority: 0.8,
-    },
-    ...newsArticles,
     {
       url: `${baseUrl}/contact`,
       lastModified: new Date(),

@@ -10,7 +10,7 @@ interface ArticleCardProps {
   date: string
   slug: string
   category?: string
-  basePath?: string // Path base cho link, default là '/handbook'
+  basePath?: string // Path base cho link, default là '/tin-tuc'
 }
 
 const ArticleCard = ({ 
@@ -21,7 +21,7 @@ const ArticleCard = ({
   date, 
   slug, 
   category,
-  basePath = '/handbook'
+  basePath = '/tin-tuc'
 }: ArticleCardProps) => {
   return (
     <Link href={`${basePath}/${slug}`} className="block h-full">
@@ -30,11 +30,17 @@ const ArticleCard = ({
         <div className="relative w-full flex-[1.4] bg-gray-200 min-h-[240px]">
           <div className="relative w-full h-full overflow-hidden">
             <img
-              src={image}
+              src={image?.trim() ? image : '/images/placeholder.jpg'}
               alt={title}
               className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
               onError={(e) => {
-                e.currentTarget.style.display = 'none'
+                const el = e.currentTarget
+                if (el.dataset.fallback === '1') {
+                  el.style.display = 'none'
+                  return
+                }
+                el.dataset.fallback = '1'
+                el.src = '/images/placeholder.jpg'
               }}
             />
           </div>

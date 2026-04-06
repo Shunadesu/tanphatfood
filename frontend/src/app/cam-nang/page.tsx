@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useMemo, useEffect } from 'react'
-import Link from 'next/link'
+import ArticleCardSkeleton from '@/components/ArticleCardSkeleton'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
 import HandbookHeroSection from '@/components/HandbookHeroSection'
@@ -10,6 +10,7 @@ import FloatingContactButtons from '@/components/FloatingContactButtons'
 import ScrollToTop from '@/components/ScrollToTop'
 import { HiChevronRight, HiSearch, HiX } from 'react-icons/hi'
 import { newsApi } from '@/services/api'
+import { formatNewsDate } from '@/lib/handbookFromApi'
 
 interface Article {
   id: string
@@ -48,15 +49,34 @@ export default function HandbookPage() {
           const articlesData = Array.isArray(responseData) ? responseData : (responseData?.data || [])
           
           // Transform news data to article format
-          const transformedArticles: Article[] = articlesData.map((news: any) => ({
-            id: String(news.id || news._id),
-            title: news.title,
-            description: news.excerpt || news.description || '',
-            image: news.image || news.thumbnail || '',
-            date: news.publishedAt || news.createdAt || news.date || '',
-            slug: news.slug,
-            category: news.category,
-          }))
+          const transformedArticles: Article[] = articlesData.map((news: any) => {
+            const cat = news.category
+            const categoryLabel =
+              typeof cat === 'object' && cat !== null && typeof cat.name === 'string'
+                ? cat.name
+                : typeof cat === 'string'
+                  ? cat
+                  : undefined
+
+            return {
+              id: String(news.id || news._id),
+              title: news.title,
+              description:
+                news.shortDescription || news.excerpt || news.description || '',
+              image:
+                news.featuredImage ||
+                (Array.isArray(news.images) && news.images[0]) ||
+                news.image ||
+                news.thumbnail ||
+                '',
+              date:
+                formatNewsDate(news.publishedAt) ||
+                formatNewsDate(news.createdAt) ||
+                String(news.date || ''),
+              slug: news.slug,
+              category: categoryLabel,
+            }
+          })
 
           setArticles(transformedArticles)
           
@@ -167,11 +187,10 @@ export default function HandbookPage() {
               </div>
             </div>
 
-            {/* Loading State */}
+            {/* Loading / Skeleton State */}
             {loading && (
-              <div className="text-center py-16">
-                <div className="inline-block animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#00652E]"></div>
-                <p className="mt-4 text-gray-600">Đang tải bài viết...</p>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 mb-12">
+                <ArticleCardSkeleton count={articlesPerPage} />
               </div>
             )}
 
@@ -222,7 +241,7 @@ export default function HandbookPage() {
                       date={article.date}
                       slug={article.slug}
                       category={article.category}
-                      basePath="/handbook"
+                      basePath="/tin-tuc"
                     />
                   ))}
                 </div>

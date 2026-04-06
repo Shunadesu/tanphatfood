@@ -6,7 +6,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'Cẩm nang | Tấn Phát Food',
     description: 'Kiến thức và kinh nghiệm về nông sản xuất khẩu, quy trình sản xuất, bảo quản và các tiêu chuẩn chất lượng.',
-    url: '/handbook',
+    url: '/tin-tuc',
   },
 }
 

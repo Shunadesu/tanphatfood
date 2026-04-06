@@ -26,7 +26,7 @@ const Navigation = () => {
     },
     {
       name: 'Cẩm nang',
-      href: '/handbook',
+      href: '/tin-tuc',
       hasDropdown: false,
     },
     { name: 'Liên hệ', href: '/contact' },

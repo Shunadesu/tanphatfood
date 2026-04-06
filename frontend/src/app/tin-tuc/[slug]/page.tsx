@@ -1,19 +1,29 @@
 'use client'
 
 import { useParams, useRouter } from 'next/navigation'
-import { getNewsBySlug } from '@/data/mockNews'
 import { HiArrowLeft, HiCalendar, HiUser } from 'react-icons/hi'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
 import FloatingContactButtons from '@/components/FloatingContactButtons'
 import ScrollToTop from '@/components/ScrollToTop'
+import { useHandbookArticle } from '@/hooks/useHandbookArticle'
 
-export default function NewsDetailPage() {
+export default function TinTucDetailPage() {
   const params = useParams()
   const router = useRouter()
-  const slug = params?.slug as string
+  const slug = params?.slug as string | undefined
+  const { article, loading } = useHandbookArticle(slug)
 
-  const article = getNewsBySlug(slug)
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-white">
+        <div className="text-center">
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#00652E]" />
+          <p className="mt-4 text-gray-600">Đang tải bài viết...</p>
+        </div>
+      </div>
+    )
+  }
 
   if (!article) {
     return (
@@ -21,10 +31,10 @@ export default function NewsDetailPage() {
         <div className="text-center">
           <h1 className="text-2xl font-bold text-gray-900 mb-4">Bài viết không tồn tại</h1>
           <button
-            onClick={() => router.push('/')}
+            onClick={() => router.push('/tin-tuc')}
             className="button-primary"
           >
-            Về trang chủ
+            Về trang tin tức
           </button>
         </div>
       </div>
@@ -35,8 +45,6 @@ export default function NewsDetailPage() {
     <div className="min-h-screen bg-white">
       <Header />
       <main>
-
-
         {/* Article Header */}
         <article className="py-8 md:py-12 mt-20">
           <div className="container mx-auto px-4 max-w-5xl">
@@ -71,11 +79,17 @@ export default function NewsDetailPage() {
             {/* Featured Image */}
             <div className="mb-8 rounded-2xl overflow-hidden shadow-lg">
               <img
-                src={article.image}
+                src={article.image?.trim() ? article.image : '/images/placeholder.jpg'}
                 alt={article.title}
                 className="w-full h-auto object-cover"
                 onError={(e) => {
-                  e.currentTarget.src = '/images/placeholder.jpg'
+                  const el = e.currentTarget
+                  if (el.dataset.fallback === '1') {
+                    el.style.display = 'none'
+                    return
+                  }
+                  el.dataset.fallback = '1'
+                  el.src = '/images/placeholder.jpg'
                 }}
               />
             </div>
@@ -114,4 +128,3 @@ export default function NewsDetailPage() {
     </div>
   )
 }
-
