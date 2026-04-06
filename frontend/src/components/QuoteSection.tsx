@@ -4,10 +4,17 @@ import { useState, useEffect, useRef } from 'react'
 import { LiaTelegramPlane } from 'react-icons/lia'
 import { HiChevronDown } from 'react-icons/hi'
 import { quotesApi } from '@/services/api'
+import {
+  sendEmailToAdmin,
+  sendAutoReplyToCustomer,
+  isEmailJSConfigured,
+  isAutoReplyConfigured,
+} from '@/services/emailjs'
 
 const QuoteSection = () => {
   const [formData, setFormData] = useState({
     fullName: '',
+    email: '',
     phone: '',
     productName: '',
     productType: 'Trái cây tươi',
@@ -69,17 +76,32 @@ const QuoteSection = () => {
       return
     }
 
+    if (!formData.email.trim()) {
+      setSubmitStatus({
+        type: 'error',
+        message: 'Vui lòng nhập địa chỉ email để nhận phản hồi',
+      })
+      return
+    }
+
+    // Basic email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    if (!emailRegex.test(formData.email.trim())) {
+      setSubmitStatus({
+        type: 'error',
+        message: 'Vui lòng nhập địa chỉ email hợp lệ',
+      })
+      return
+    }
+
     setIsSubmitting(true)
     setSubmitStatus({ type: null, message: '' })
 
     try {
       // Prepare data for API
-      // Note: Email is required by backend, so we'll use a placeholder or generate from phone if available
       const quoteData: any = {
         name: formData.fullName.trim(),
-        email: formData.phone.trim() 
-          ? `contact_${formData.phone.trim().replace(/\s+/g, '')}@tanphatfood.com`
-          : `contact_${Date.now()}@tanphatfood.com`, // Fallback email if no phone
+        email: formData.email.trim(),
       }
 
       // Add optional fields if they have values
@@ -104,9 +126,28 @@ const QuoteSection = () => {
       const response = await quotesApi.create(quoteData)
 
       if (response.success) {
+        // Send emails via EmailJS (non-blocking)
+        if (isEmailJSConfigured()) {
+          const emailData = {
+            name: formData.fullName.trim(),
+            email: formData.email.trim(),
+            phone: formData.phone.trim(),
+            productName: formData.productName.trim(),
+            productType: formData.productType,
+            market: formData.market.trim(),
+          }
+
+          const emailTasks = [sendEmailToAdmin(emailData)]
+          if (isAutoReplyConfigured()) {
+            emailTasks.push(sendAutoReplyToCustomer(emailData))
+          }
+          Promise.all(emailTasks).catch((err) => console.error('EmailJS sending error:', err))
+        }
+
         // Success - reset form and show success message
         setFormData({
           fullName: '',
+          email: '',
           phone: '',
           productName: '',
           productType: 'Trái cây tươi',
@@ -225,6 +266,33 @@ const QuoteSection = () => {
 
                       {/* Right Column */}
                       <div>
+                        {/* Email */}
+                        <div>
+                          <label
+                            htmlFor="email"
+                            className="block text-sm font-semibold text-gray-700 mb-2"
+                          >
+                            Email <span className="text-red-500">*</span>
+                          </label>
+                          <input
+                            type="email"
+                            id="email"
+                            name="email"
+                            value={formData.email}
+                            onChange={handleInputChange}
+                            placeholder="Nhập email của bạn..."
+                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00652E] focus:border-transparent text-gray-900"
+                            required
+                            disabled={isSubmitting}
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Two Column Fields - Second Row */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+                      {/* Left Column */}
+                      <div>
                         {/* Điện thoại */}
                         <div>
                           <label
@@ -245,11 +313,8 @@ const QuoteSection = () => {
                           />
                         </div>
                       </div>
-                    </div>
 
-                    {/* Two Column Fields - Second Row */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
-                      {/* Left Column */}
+                      {/* Right Column */}
                       <div>
                         {/* Tên sản phẩm */}
                         <div>
@@ -264,29 +329,6 @@ const QuoteSection = () => {
                             id="productName"
                             name="productName"
                             value={formData.productName}
-                            onChange={handleInputChange}
-                            placeholder="Nhập thông tin ..."
-                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00652E] focus:border-transparent text-gray-900"
-                            disabled={isSubmitting}
-                          />
-                        </div>
-                      </div>
-
-                      {/* Right Column */}
-                      <div>
-                        {/* Thị trường */}
-                        <div>
-                          <label
-                            htmlFor="market"
-                            className="block text-sm font-semibold text-gray-700 mb-2"
-                          >
-                            Thị trường
-                          </label>
-                          <input
-                            type="text"
-                            id="market"
-                            name="market"
-                            value={formData.market}
                             onChange={handleInputChange}
                             placeholder="Nhập thông tin ..."
                             className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00652E] focus:border-transparent text-gray-900"

@@ -48,6 +48,7 @@ export default function Quotes() {
   const [searchQuery, setSearchQuery] = useState('')
   const [page, setPage] = useState(1)
   const [totalPages, setTotalPages] = useState(1)
+  const [totalCount, setTotalCount] = useState(0)
   const [filterStatus, setFilterStatus] = useState<string>('all')
   const [filterRead, setFilterRead] = useState<string>('all')
   const [selectedQuote, setSelectedQuote] = useState<Quote | null>(null)
@@ -62,7 +63,7 @@ export default function Quotes() {
       setLoading(true)
       const params: any = {
         page,
-        limit: 20,
+        limit: 15,
         search: searchQuery || undefined,
       }
       if (filterStatus !== 'all') {
@@ -76,13 +77,15 @@ export default function Quotes() {
 
       if (response.success) {
         const responseData = response.data as any
-        const quotesData = Array.isArray(responseData)
+        const rawQuotes = Array.isArray(responseData)
           ? responseData
           : (responseData?.data && Array.isArray(responseData.data))
           ? responseData.data
           : []
+        const quotesData = rawQuotes.map((q: any) => ({ id: q._id, ...q }))
         setQuotes(quotesData)
         setTotalPages((response as any).pages || responseData?.pages || 1)
+        setTotalCount((response as any).total || responseData?.total || rawQuotes.length)
       } else {
         console.error('API Error:', response.message || response.error)
         setQuotes([])
@@ -148,8 +151,6 @@ export default function Quotes() {
         year: 'numeric',
         month: '2-digit',
         day: '2-digit',
-        hour: '2-digit',
-        minute: '2-digit',
       })
     } catch {
       return dateString
@@ -160,6 +161,7 @@ export default function Quotes() {
     <div>
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-3xl font-bold text-gray-900">Quản lý yêu cầu báo giá</h1>
+        <span className="text-sm text-gray-500">Tổng: {totalCount} yêu cầu</span>
       </div>
 
       {/* Search and Filter */}
@@ -167,10 +169,13 @@ export default function Quotes() {
         <div className="relative flex-1">
           <input
             type="text"
-            placeholder="Tìm kiếm theo tên, email, số điện thoại, công ty..."
+            placeholder="Tìm kiếm theo tên, email, số điện thoại..."
             className="input input-bordered w-full pl-10"
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            onChange={(e) => {
+              setSearchQuery(e.target.value)
+              setPage(1)
+            }}
           />
           <HiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
         </div>
@@ -178,7 +183,10 @@ export default function Quotes() {
         <select
           className="select select-bordered w-full md:w-auto"
           value={filterStatus}
-          onChange={(e) => setFilterStatus(e.target.value)}
+          onChange={(e) => {
+            setFilterStatus(e.target.value)
+            setPage(1)
+          }}
         >
           <option value="all">Tất cả trạng thái</option>
           <option value="pending">Chờ xử lý</option>
@@ -191,7 +199,10 @@ export default function Quotes() {
         <select
           className="select select-bordered w-full md:w-auto"
           value={filterRead}
-          onChange={(e) => setFilterRead(e.target.value)}
+          onChange={(e) => {
+            setFilterRead(e.target.value)
+            setPage(1)
+          }}
         >
           <option value="all">Tất cả</option>
           <option value="false">Chưa đọc</option>
@@ -200,132 +211,169 @@ export default function Quotes() {
       </div>
 
       {loading ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {[...Array(6)].map((_, index) => (
-            <div key={index} className="bg-gray-200 animate-pulse rounded-lg h-64"></div>
-          ))}
+        <div className="bg-white rounded-lg shadow p-8">
+          <div className="animate-pulse space-y-4">
+            {[...Array(5)].map((_, i) => (
+              <div key={i} className="h-12 bg-gray-200 rounded"></div>
+            ))}
+          </div>
         </div>
       ) : quotes.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {quotes.map((quote) => (
-            <div
-              key={quote.id}
-              className={`bg-white rounded-lg shadow-md overflow-hidden flex flex-col border-l-4 ${
-                !quote.isRead ? 'border-blue-500' : 'border-gray-300'
-              }`}
-            >
-              <div className="p-4 flex-1 flex flex-col">
-                <div className="flex items-start justify-between mb-3">
-                  <h3 className="text-lg font-semibold text-gray-800 line-clamp-2 flex-1">
-                    {quote.name}
-                  </h3>
-                  {!quote.isRead && (
-                    <span className="ml-2 px-2 py-1 rounded-full bg-blue-500 text-white text-xs font-medium">
-                      Mới
-                    </span>
-                  )}
-                </div>
-
-                <div className="space-y-2 mb-3 text-sm text-gray-600">
-                  <div className="flex items-center gap-2">
-                    <HiMail className="w-4 h-4 text-gray-400" />
-                    <span className="line-clamp-1">{quote.email}</span>
-                  </div>
-                  {quote.phone && (
-                    <div className="flex items-center gap-2">
-                      <HiPhone className="w-4 h-4 text-gray-400" />
-                      <span>{quote.phone}</span>
-                    </div>
-                  )}
-                  {quote.company && (
-                    <div className="flex items-center gap-2">
-                      <HiOfficeBuilding className="w-4 h-4 text-gray-400" />
-                      <span className="line-clamp-1">{quote.company}</span>
-                    </div>
-                  )}
-                </div>
-
-                {quote.productName && (
-                  <div className="mb-3">
-                    <p className="text-sm text-gray-500 mb-1">Sản phẩm:</p>
-                    <p className="text-sm font-medium text-gray-800 line-clamp-1">
-                      {quote.productName}
-                    </p>
-                  </div>
-                )}
-
-                {quote.message && (
-                  <div className="mb-3">
-                    <p className="text-sm text-gray-500 mb-1">Tin nhắn:</p>
-                    <p className="text-sm text-gray-700 line-clamp-2">{quote.message}</p>
-                  </div>
-                )}
-
-                <div className="flex items-center justify-between text-xs text-gray-500 mb-3">
-                  <span>{formatDate(quote.createdAt)}</span>
-                  <span
-                    className={`px-2 py-1 rounded-full text-xs font-medium ${
-                      statusColors[quote.status] || statusColors.pending
+        <div className="bg-white rounded-lg shadow overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="px-2 py-2 w-full">
+              <thead>
+                <tr className="bg-gray-50 border-b border-gray-200">
+                  <th className="text-sm font-semibold text-gray-600 p-2">Khách hàng</th>
+                  <th className="text-sm font-semibold text-gray-600">Liên hệ</th>
+                  <th className="text-sm font-semibold text-gray-600">Sản phẩm</th>
+                  <th className="text-sm font-semibold text-gray-600">Quốc gia</th>
+                  <th className="text-sm font-semibold text-gray-600">Ngày gửi</th>
+                  <th className="text-sm font-semibold text-gray-600">Trạng thái</th>
+                  <th className="text-center text-sm font-semibold text-gray-600 w-24">Thao tác</th>
+                </tr>
+              </thead>
+              <tbody>
+                {quotes.map((quote) => (
+                  <tr
+                    key={quote.id}
+                    className={`hover:bg-gray-50 border-b border-gray-100 ${
+                      !quote.isRead ? 'bg-blue-50/30' : ''
                     }`}
                   >
-                    {statusLabels[quote.status] || quote.status}
-                  </span>
-                </div>
+                    <td>
+                      <div className="flex items-center gap-2">
+                        {!quote.isRead && (
+                          <span className="inline-block w-2 h-2 rounded-full bg-blue-500 flex-shrink-0"></span>
+                        )}
+                        <div>
+                          <p className="font-medium text-gray-900">{quote.name}</p>
+                          {quote.company && (
+                            <p className="text-xs text-gray-500 flex items-center gap-1">
+                              <HiOfficeBuilding className="w-3 h-3" />
+                              {quote.company}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    </td>
+                    <td className='px-2'>
+                      <div className="space-y-1">
+                        <p className="text-sm text-gray-700 flex items-center gap-1">
+                          <HiMail className="w-3 h-3 text-gray-400 flex-shrink-0" />
+                          <span className="truncate max-w-[180px]">{quote.email}</span>
+                        </p>
+                        {quote.phone && (
+                          <p className="text-sm text-gray-500 flex items-center gap-1">
+                            <HiPhone className="w-3 h-3 text-gray-400 flex-shrink-0" />
+                            {quote.phone}
+                          </p>
+                        )}
+                      </div>
+                    </td>
+                    <td>
+                      {quote.productName ? (
+                        <span className="text-sm text-gray-700">{quote.productName}</span>
+                      ) : (
+                        <span className="text-sm text-gray-400 italic">—</span>
+                      )}
+                    </td>
+                    <td>
+                      {quote.country ? (
+                        <span className="text-sm text-gray-700">{quote.country}</span>
+                      ) : (
+                        <span className="text-sm text-gray-400 italic">—</span>
+                      )}
+                    </td>
+                    <td>
+                      <span className="text-sm text-gray-600">{formatDate(quote.createdAt)}</span>
+                    </td>
+                    <td>
+                      <span
+                        className={`inline-block px-2 py-1 rounded-full text-xs font-medium ${
+                          statusColors[quote.status] || statusColors.pending
+                        }`}
+                      >
+                        {statusLabels[quote.status] || quote.status}
+                      </span>
+                    </td>
+                    <td>
+                      <div className="flex items-center justify-center gap-2">
+                        <button
+                          onClick={() => handleView(quote)}
+                          className="btn btn-ghost btn-xs text-blue-600 hover:bg-blue-50"
+                          title="Xem chi tiết"
+                        >
+                          <HiEye className="w-4 h-4" />
+                        </button>
+                        <button
+                          onClick={() => handleDelete(quote.id)}
+                          className="btn btn-ghost btn-xs text-red-500 hover:bg-red-50"
+                          title="Xóa"
+                        >
+                          <HiTrash className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
 
-                <div className="flex gap-2 mt-auto">
-                  <button
-                    onClick={() => handleView(quote)}
-                    className="button-info button-sm flex-1 inline-flex items-center justify-center gap-1"
-                  >
-                    <HiEye className="w-4 h-4" />
-                    Xem
-                  </button>
-                  <button
-                    onClick={() => handleDelete(quote.id)}
-                    className="button-danger button-sm flex-1 inline-flex items-center justify-center gap-1"
-                  >
-                    <HiTrash className="w-4 h-4" />
-                    Xóa
-                  </button>
-                </div>
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <div className="flex items-center justify-between px-4 py-3 border-t border-gray-100">
+              <span className="text-sm text-gray-500">
+                Trang {page} / {totalPages}
+              </span>
+              <div className="join">
+                <button
+                  className="join-item btn btn-sm"
+                  onClick={() => setPage((prev) => Math.max(prev - 1, 1))}
+                  disabled={page === 1}
+                >
+                  «
+                </button>
+                {[...Array(totalPages)].map((_, i) => {
+                  const pageNum = i + 1
+                  if (
+                    pageNum === 1 ||
+                    pageNum === totalPages ||
+                    (pageNum >= page - 1 && pageNum <= page + 1)
+                  ) {
+                    return (
+                      <button
+                        key={i}
+                        className={`join-item btn btn-sm ${page === pageNum ? 'btn-active' : ''}`}
+                        onClick={() => setPage(pageNum)}
+                      >
+                        {pageNum}
+                      </button>
+                    )
+                  } else if (pageNum === page - 2 || pageNum === page + 2) {
+                    return (
+                      <span key={i} className="join-item btn btn-sm btn-disabled">
+                        ...
+                      </span>
+                    )
+                  }
+                  return null
+                })}
+                <button
+                  className="join-item btn btn-sm"
+                  onClick={() => setPage((prev) => Math.min(prev + 1, totalPages))}
+                  disabled={page === totalPages}
+                >
+                  »
+                </button>
               </div>
             </div>
-          ))}
+          )}
         </div>
       ) : (
         <div className="bg-white rounded-lg shadow p-8 text-center text-gray-500">
           Không có yêu cầu báo giá nào được tìm thấy.
-        </div>
-      )}
-
-      {/* Pagination */}
-      {totalPages > 1 && (
-        <div className="flex justify-center mt-8">
-          <div className="join">
-            <button
-              className="join-item btn"
-              onClick={() => setPage((prev) => Math.max(prev - 1, 1))}
-              disabled={page === 1}
-            >
-              «
-            </button>
-            {[...Array(totalPages)].map((_, i) => (
-              <button
-                key={i}
-                className={`join-item btn ${page === i + 1 ? 'btn-active' : ''}`}
-                onClick={() => setPage(i + 1)}
-              >
-                {i + 1}
-              </button>
-            ))}
-            <button
-              className="join-item btn"
-              onClick={() => setPage((prev) => Math.min(prev + 1, totalPages))}
-              disabled={page === totalPages}
-            >
-              »
-            </button>
-          </div>
         </div>
       )}
 
@@ -451,4 +499,3 @@ export default function Quotes() {
     </div>
   )
 }
-

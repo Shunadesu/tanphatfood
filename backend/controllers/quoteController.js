@@ -315,6 +315,22 @@ export const updateQuote = async (req, res) => {
 // @access  Private
 export const deleteQuote = async (req, res) => {
   try {
+    // Validate id
+    if (!req.params.id) {
+      return res.status(400).json({
+        success: false,
+        message: 'ID yêu cầu báo giá không được cung cấp',
+      });
+    }
+
+    // Validate ObjectId format
+    if (!req.params.id.match(/^[0-9a-fA-F]{24}$/)) {
+      return res.status(400).json({
+        success: false,
+        message: 'ID yêu cầu báo giá không hợp lệ',
+      });
+    }
+
     const quote = await Quote.findById(req.params.id);
 
     if (!quote) {
