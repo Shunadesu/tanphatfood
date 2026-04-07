@@ -13,7 +13,6 @@ interface EmailData {
   phone?: string
   productName?: string
   productType?: string
-  market?: string
 }
 
 export const sendEmailToAdmin = async (data: EmailData): Promise<boolean> => {
@@ -29,8 +28,7 @@ export const sendEmailToAdmin = async (data: EmailData): Promise<boolean> => {
       phone: data.phone || 'Không cung cấp',
       product_name: data.productName || 'Không cung cấp',
       product_type: data.productType || 'Không cung cấp',
-      market: data.market || 'Không cung cấp',
-      message: `Yêu cầu báo giá từ website\n\nTên: ${data.name}\nEmail: ${data.email}\nSố điện thoại: ${data.phone || 'Không cung cấp'}\nSản phẩm: ${data.productName || 'Không cung cấp'}\nLoại sản phẩm: ${data.productType || 'Không cung cấp'}\nThị trường: ${data.market || 'Không cung cấp'}`,
+      message: `Yêu cầu báo giá từ website\n\nTên: ${data.name}\nEmail: ${data.email}\nSố điện thoại: ${data.phone || 'Không cung cấp'}\nSản phẩm: ${data.productName || 'Không cung cấp'}\nLoại sản phẩm: ${data.productType || 'Không cung cấp'}`,
     }
 
     const response = await emailjs.send(

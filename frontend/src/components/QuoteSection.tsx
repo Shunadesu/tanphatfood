@@ -134,7 +134,6 @@ const QuoteSection = () => {
             phone: formData.phone.trim(),
             productName: formData.productName.trim(),
             productType: formData.productType,
-            market: formData.market.trim(),
           }
 
           const emailTasks = [sendEmailToAdmin(emailData)]

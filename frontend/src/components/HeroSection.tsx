@@ -68,13 +68,13 @@ const HeroSection = () => {
 
           {/* CTA Buttons */}
           <div className="flex flex-col sm:flex-row items-start gap-4">
-              <button className='button-primary flex items-center gap-2'>
+              <Link href='/san-pham/trai-cay-tuoi' className='button-primary flex items-center gap-2'>
                 Khám phá sản phẩm
                 <LiaTelegramPlane className='w-5 h-5' />
-              </button>
-              <button className='button-secondary'>
+              </Link>
+              <Link href='/lien-he' className='button-secondary'>
                 Liên hệ báo giá
-              </button>
+              </Link>
           </div>
         </div>
       </div>
